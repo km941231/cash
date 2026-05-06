@@ -187,10 +187,14 @@
       border: 1px solid rgba(0,0,0,0.08);
       flex-shrink: 0; gap: 1px;
     }
-    .mini-card .mv { font-size: 12px; font-weight: 900; line-height: 1; }
-    .mini-card .ms { font-size: 11px; line-height: 1; }
+    .mini-card .mv { font-size: 15px; font-weight: 900; line-height: 1; }
+    .mini-card .ms { font-size: 14px; line-height: 1; }
     .mini-card.red { color: #e11d48; }
     .mini-card.black { color: #111827; }
+    .mini-card.highlighted {
+      border: 2px solid #ef4444;
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.25), 0 2px 10px rgba(239,68,68,0.3);
+    }
     .outs-none { color: var(--text-3); font-size: 13px; font-style: italic; padding-top: 10px; }
 
 
@@ -673,25 +677,25 @@ function toggleFaq(btn) {
 
 /* ─── 패 랭킹 데이터 ─── */
 const RANK_DATA = [
-  {num:1,  tier:'gold',   name:'로얄 플러시',    desc:'같은 무늬의 A·K·Q·J·10. 포커 최강 패.',
+  {num:1,  tier:'gold',   name:'로얄 플러시',    desc:'같은 무늬의 A·K·Q·J·10. 포커 최강 패.',          hi:[0,1,2,3,4],
    cards:[{value:'A',suit:'♠'},{value:'K',suit:'♠'},{value:'Q',suit:'♠'},{value:'J',suit:'♠'},{value:'T',suit:'♠'}]},
-  {num:2,  tier:'silver', name:'스트레이트 플러시', desc:'같은 무늬의 연속된 5장. 로얄 플러시 제외 최강.',
+  {num:2,  tier:'silver', name:'스트레이트 플러시', desc:'같은 무늬의 연속된 5장. 로얄 플러시 제외 최강.', hi:[0,1,2,3,4],
    cards:[{value:'9',suit:'♥'},{value:'8',suit:'♥'},{value:'7',suit:'♥'},{value:'6',suit:'♥'},{value:'5',suit:'♥'}]},
-  {num:3,  tier:'bronze', name:'포카드',          desc:'같은 숫자 4장. 매우 희귀하고 강력한 패.',
+  {num:3,  tier:'bronze', name:'포카드',          desc:'같은 숫자 4장. 매우 희귀하고 강력한 패.',          hi:[0,1,2,3],
    cards:[{value:'K',suit:'♠'},{value:'K',suit:'♥'},{value:'K',suit:'♦'},{value:'K',suit:'♣'},{value:'3',suit:'♠'}]},
-  {num:4,  tier:'',       name:'풀하우스',         desc:'트리플 1개 + 페어 1개. 안정적인 강패.',
+  {num:4,  tier:'',       name:'풀하우스',         desc:'트리플(빨간박스) + 페어(빨간박스) 조합.',          hi:[0,1,2,3,4],
    cards:[{value:'Q',suit:'♠'},{value:'Q',suit:'♥'},{value:'Q',suit:'♦'},{value:'7',suit:'♠'},{value:'7',suit:'♥'}]},
-  {num:5,  tier:'',       name:'플러시',           desc:'같은 무늬 5장. 연속될 필요 없음.',
+  {num:5,  tier:'',       name:'플러시',           desc:'같은 무늬 5장. 연속될 필요 없음.',                 hi:[0,1,2,3,4],
    cards:[{value:'A',suit:'♣'},{value:'J',suit:'♣'},{value:'8',suit:'♣'},{value:'5',suit:'♣'},{value:'2',suit:'♣'}]},
-  {num:6,  tier:'',       name:'스트레이트',        desc:'연속된 숫자 5장. 무늬 무관.',
+  {num:6,  tier:'',       name:'스트레이트',        desc:'연속된 숫자 5장. 무늬 무관.',                      hi:[0,1,2,3,4],
    cards:[{value:'9',suit:'♠'},{value:'8',suit:'♥'},{value:'7',suit:'♦'},{value:'6',suit:'♣'},{value:'5',suit:'♠'}]},
-  {num:7,  tier:'',       name:'트리플',           desc:'같은 숫자 3장.',
+  {num:7,  tier:'',       name:'트리플',           desc:'같은 숫자 3장(빨간박스). 나머지는 키커.',           hi:[0,1,2],
    cards:[{value:'J',suit:'♠'},{value:'J',suit:'♥'},{value:'J',suit:'♦'},{value:'A',suit:'♣'},{value:'4',suit:'♠'}]},
-  {num:8,  tier:'',       name:'투페어',           desc:'페어 2개 조합. 자주 완성되는 패.',
+  {num:8,  tier:'',       name:'투페어',           desc:'페어 2세트(빨간박스). 나머지 1장은 키커.',          hi:[0,1,2,3],
    cards:[{value:'T',suit:'♠'},{value:'T',suit:'♥'},{value:'6',suit:'♦'},{value:'6',suit:'♣'},{value:'K',suit:'♠'}]},
-  {num:9,  tier:'',       name:'원페어',           desc:'같은 숫자 2장. 가장 자주 나오는 패.',
+  {num:9,  tier:'',       name:'원페어',           desc:'같은 숫자 2장(빨간박스). 나머지 3장은 키커.',       hi:[0,1],
    cards:[{value:'A',suit:'♠'},{value:'A',suit:'♥'},{value:'K',suit:'♦'},{value:'9',suit:'♣'},{value:'3',suit:'♠'}]},
-  {num:10, tier:'',       name:'하이카드',          desc:'아무 조합 없을 때 가장 높은 카드로 비교.',
+  {num:10, tier:'',       name:'하이카드',          desc:'가장 높은 카드(빨간박스) 하나로만 비교.',           hi:[0],
    cards:[{value:'A',suit:'♠'},{value:'J',suit:'♦'},{value:'9',suit:'♣'},{value:'6',suit:'♥'},{value:'2',suit:'♠'}]},
 ];
 
@@ -720,7 +724,7 @@ function initRankings() {
     top.appendChild(num); top.appendChild(name);
 
     const row=document.createElement('div'); row.className='rank-cards-row';
-    for (const c of r.cards) row.appendChild(makeMiniCard(c));
+    r.cards.forEach((c,i)=>{ const mc=makeMiniCard(c); if(r.hi.includes(i)) mc.classList.add('highlighted'); row.appendChild(mc); });
 
     const desc=document.createElement('p'); desc.className='rank-desc'; desc.textContent=r.desc;
 
