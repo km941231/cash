@@ -222,30 +222,50 @@
     }
     .cards-row {
       display: flex; justify-content: center; gap: 8px;
-      min-height: 86px; align-items: center; flex-wrap: wrap;
+      min-height: 92px; align-items: center; flex-wrap: wrap;
     }
 
     /* 카드 */
     .card {
-      width: 56px; height: 82px;
-      background: var(--card-white);
-      border-radius: 7px;
+      width: 62px; height: 90px;
+      background: #ffffff;
+      border-radius: 9px;
       display: flex; flex-direction: column;
       justify-content: space-between;
-      padding: 4px 5px;
-      box-shadow: 0 4px 12px var(--card-shadow);
+      padding: 5px 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.22), 0 8px 22px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+      border: 1px solid rgba(0,0,0,0.09);
       font-weight: 800; flex-shrink: 0;
       animation: dealCard 0.38s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .card .top { font-size: 14px; line-height: 1.15; color: inherit; }
-    .card .mid { font-size: 21px; text-align: center; line-height: 1; color: inherit; }
-    .card .bot { font-size: 14px; line-height: 1.15; text-align: right; transform: rotate(180deg); color: inherit; }
-    .card.red   { color: #dc2626; }
+    .card .top { color: inherit; display: flex; flex-direction: column; align-items: flex-start; line-height: 1; }
+    .card .top .cv { font-size: 15px; font-weight: 900; line-height: 1; }
+    .card .top .cs { font-size: 11px; line-height: 1.1; }
+    .card .mid { font-size: 26px; text-align: center; line-height: 1; color: inherit; flex: 1; display: flex; align-items: center; justify-content: center; }
+    .card .bot { transform: rotate(180deg); color: inherit; display: flex; flex-direction: column; align-items: flex-start; line-height: 1; }
+    .card .bot .cv { font-size: 15px; font-weight: 900; line-height: 1; }
+    .card .bot .cs { font-size: 11px; line-height: 1.1; }
+    .card.red   { color: #e11d48; }
     .card.black { color: #111827; }
-    .card-slot {
-      width: 56px; height: 82px; border-radius: 7px;
-      border: 2px dashed var(--border);
-      background: rgba(15,52,96,0.15); flex-shrink: 0;
+    .card-back {
+      width: 62px; height: 90px; border-radius: 9px; flex-shrink: 0;
+      background: linear-gradient(145deg, #1e3a8a 0%, #2563eb 50%, #1e40af 100%);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3), 0 8px 22px rgba(0,0,0,0.2);
+      position: relative; overflow: hidden;
+    }
+    .card-back::before {
+      content: ''; position: absolute; inset: 6px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+    }
+    .card-back::after {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent 0px, transparent 5px,
+        rgba(255,255,255,0.045) 5px, rgba(255,255,255,0.045) 10px
+      );
     }
     @keyframes dealCard {
       from { transform: scale(0.35) translateY(-50px) rotate(-6deg); opacity: 0; }
@@ -953,15 +973,13 @@ function startGame() {
   renderAll(); calcAsync(1500);
 }
 function doCall() {
-  const t={
-    PREFLOP:()=>{gs.comm=deal(gs.deck,3);gs.phase='FLOP';},
-    FLOP:   ()=>{gs.comm.push(...deal(gs.deck,1));gs.phase='TURN';},
-    TURN:   ()=>{gs.comm.push(...deal(gs.deck,1));gs.phase='RIVER';},
-    RIVER:  ()=>{gs.phase='DONE';}
-  };
-  if (t[gs.phase]) t[gs.phase]();
-  renderAll();
-  if (gs.phase!=='DONE') calcAsync(1000);
+  if (gs.phase==='PREFLOP') { gs.comm=deal(gs.deck,3); gs.phase='FLOP'; renderAll(); calcAsync(1000); }
+  else if (gs.phase==='FLOP') { gs.comm.push(...deal(gs.deck,1)); gs.phase='TURN'; renderAll(); calcAsync(1000); }
+  else if (gs.phase==='TURN') {
+    gs.comm.push(...deal(gs.deck,1)); gs.phase='RIVER'; renderAll();
+    setTimeout(()=>{ gs.phase='DONE'; renderAll(); }, 900);
+  }
+  else if (gs.phase==='RIVER') { gs.phase='DONE'; renderAll(); }
 }
 function doFold() { gs.phase='FOLD'; renderAll(); }
 
@@ -977,10 +995,10 @@ function makeCard(c) {
   const red=c.suit==='♥'||c.suit==='♦';
   el.className='card '+(red?'red':'black');
   const v=c.value==='T'?'10':c.value;
-  el.innerHTML=`<div class="top">${v}${c.suit}</div><div class="mid">${c.suit}</div><div class="bot">${v}${c.suit}</div>`;
+  el.innerHTML=`<div class="top"><div class="cv">${v}</div><div class="cs">${c.suit}</div></div><div class="mid">${c.suit}</div><div class="bot"><div class="cv">${v}</div><div class="cs">${c.suit}</div></div>`;
   return el;
 }
-function makeSlot() { const el=document.createElement('div'); el.className='card-slot'; return el; }
+function makeCardBack() { const el=document.createElement('div'); el.className='card-back'; return el; }
 
 function renderStages() {
   const bar=document.getElementById('stage-bar'); bar.innerHTML='';
@@ -996,7 +1014,7 @@ function renderStages() {
 }
 function renderCommunity() {
   const a=document.getElementById('community-cards'); a.innerHTML='';
-  for (let i=0;i<5;i++) a.appendChild(i<gs.comm.length?makeCard(gs.comm[i]):makeSlot());
+  for (let i=0;i<5;i++) a.appendChild(i<gs.comm.length?makeCard(gs.comm[i]):makeCardBack());
 }
 function renderWinRate() {
   const pct=document.getElementById('wr-pct'),fill=document.getElementById('wr-fill'),sub=document.getElementById('wr-sub');
@@ -1026,11 +1044,11 @@ function renderPlayer() {
 function renderButtons() {
   const area=document.getElementById('action-area'); area.innerHTML='';
   const add=(cls,txt,fn)=>{const b=document.createElement('button');b.className='gbtn '+cls;b.textContent=txt;b.onclick=fn;area.appendChild(b);};
-  if (gs.phase==='IDLE')       add('gbtn-call','게임 시작',startGame);
+  if (gs.phase==='IDLE')        add('gbtn-call','게임 시작',startGame);
   else if (gs.phase==='PREFLOP'){add('gbtn-call','콜 → 플랍 보기',doCall);add('gbtn-fold','폴드',doFold);}
   else if (gs.phase==='FLOP')  {add('gbtn-next','턴 카드 보기',doCall);add('gbtn-fold','폴드',doFold);}
   else if (gs.phase==='TURN')  {add('gbtn-next','리버 카드 보기',doCall);add('gbtn-fold','폴드',doFold);}
-  else if (gs.phase==='RIVER')  add('gbtn-next','최종 패 확인',doCall);
+  else if (gs.phase==='RIVER') {} // 자동으로 DONE 전환 중
   else                          add('gbtn-new','새 게임',startGame);
 }
 function renderResult() {
@@ -1043,7 +1061,7 @@ function renderResult() {
     el.innerHTML=b?`최종 패: <span style="font-size:20px">${HAND_NAMES[b.rank]}</span>`:'결과를 확인하세요.';
     return;
   }
-  const msgs={FLOP:'플랍 오픈!',TURN:'턴 오픈!',RIVER:'리버 오픈! 최종 패를 확인하세요.'};
+  const msgs={FLOP:'플랍 오픈!',TURN:'턴 오픈!',RIVER:'리버 오픈!'};
   el.className='result-box res-info vis'; el.textContent=msgs[gs.phase]||'';
 }
 function renderAll(){renderStages();renderCommunity();renderWinRate();renderOuts();renderPlayer();renderButtons();renderResult();}
