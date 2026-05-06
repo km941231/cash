@@ -1,591 +1,1052 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>텍사스 홀덤 연습</title>
+  <meta name="description" content="텍사스 홀덤 포커 핸드 분석 도구. 내 패의 승률과 아웃츠를 실시간으로 계산하고 포커 전략과 규칙을 학습하세요. 무료 온라인 홀덤 연습 사이트.">
+  <meta name="keywords" content="텍사스 홀덤, 포커, 홀덤 연습, 승률 계산, 아웃츠, 포커 전략, 포커 규칙, 핸드 랭킹, poker, texas holdem">
+  <meta name="author" content="홀덤 연습소">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="텍사스 홀덤 핸드 분석기 | 홀덤 연습소">
+  <meta property="og:description" content="내 패의 승률과 아웃츠를 실시간으로 계산하고 포커 전략을 학습하세요.">
+  <meta property="og:type" content="website">
+  <title>텍사스 홀덤 핸드 분석기 | 홀덤 연습소</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ═══════════════════════════════════
+       CSS 변수 (다크 / 라이트 모드)
+    ═══════════════════════════════════ */
+    :root {
+      --bg-base:    #1a1a2e;
+      --bg-surface: #16213e;
+      --bg-deep:    #0a2540;
+      --bg-card:    #0f3460;
+      --accent:     #4ade80;
+      --accent2:    #22c55e;
+      --danger:     #e94560;
+      --warn:       #fbbf24;
+      --info:       #90cdf4;
+      --text-1:     #e2e8f0;
+      --text-2:     #a0aec0;
+      --text-3:     #4a5568;
+      --border:     #1e4d8c;
+      --card-white: #ffffff;
+      --card-shadow:rgba(0,0,0,0.45);
+      --nav-bg:     rgba(22,33,62,0.97);
+      --shadow-lg:  0 20px 60px rgba(0,0,0,0.55);
+      --radius-lg:  20px;
+      --radius-md:  12px;
+      --radius-sm:  8px;
+    }
+    [data-theme="light"] {
+      --bg-base:    #f0f4f8;
+      --bg-surface: #ffffff;
+      --bg-deep:    #e8f0fe;
+      --bg-card:    #dbeafe;
+      --accent:     #16a34a;
+      --accent2:    #15803d;
+      --danger:     #dc2626;
+      --warn:       #d97706;
+      --info:       #2563eb;
+      --text-1:     #1a202c;
+      --text-2:     #4a5568;
+      --text-3:     #9ca3af;
+      --border:     #bfdbfe;
+      --card-white: #ffffff;
+      --card-shadow:rgba(0,0,0,0.12);
+      --nav-bg:     rgba(255,255,255,0.97);
+      --shadow-lg:  0 20px 60px rgba(0,0,0,0.12);
+    }
 
+    /* ═══════════════════════════════════
+       기본 리셋
+    ═══════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      background: #1a1a2e;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 24px 16px 40px;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-1);
+      line-height: 1.7;
+      transition: background 0.3s, color 0.3s;
     }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img { max-width: 100%; }
 
-    #game-container {
-      background: #16213e;
-      border-radius: 24px;
-      padding: 24px;
-      width: 100%;
-      max-width: 460px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    /* ═══════════════════════════════════
+       내비게이션
+    ═══════════════════════════════════ */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
     }
-
-    /* ─── 헤더 ─── */
-    .header { text-align: center; }
-    .header h1 { color: #e2e8f0; font-size: 21px; font-weight: 700; }
-    .header h1 em { color: #4ade80; font-style: normal; }
-    .header p { color: #4a5568; font-size: 12px; margin-top: 3px; }
-
-    /* ─── 단계 표시 ─── */
-    .stage-bar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 2px;
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px; gap: 16px;
     }
+    .nav-logo {
+      font-size: 18px; font-weight: 800;
+      color: var(--text-1); white-space: nowrap;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links {
+      display: flex; align-items: center; gap: 4px;
+      list-style: none; flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--text-2); font-size: 14px; font-weight: 500;
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-links a:hover { background: var(--bg-card); color: var(--accent); text-decoration: none; }
+    .theme-btn {
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-2); border-radius: 999px;
+      padding: 6px 14px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .theme-btn:hover { background: var(--accent); color: #0d1f0d; border-color: var(--accent); }
+
+    /* ═══════════════════════════════════
+       히어로
+    ═══════════════════════════════════ */
+    .hero {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 24px 56px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(74,222,128,0.15);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px; padding: 4px 14px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 800; line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .hero h1 em { color: var(--accent); font-style: normal; }
+    .hero p {
+      font-size: 17px; color: var(--text-2);
+      max-width: 540px; margin: 0 auto 32px;
+    }
+    .hero-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent); color: #0d1f0d;
+      padding: 13px 28px; border-radius: var(--radius-md);
+      font-size: 16px; font-weight: 700; border: none; cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { background: var(--accent2); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-outline {
+      background: transparent; color: var(--text-2);
+      padding: 13px 28px; border-radius: var(--radius-md);
+      font-size: 16px; font-weight: 700;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 40px;
+      margin-top: 40px; flex-wrap: wrap;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat strong { display: block; font-size: 26px; font-weight: 800; color: var(--accent); }
+    .hero-stat span { font-size: 13px; color: var(--text-3); }
+
+    /* ═══════════════════════════════════
+       공통 섹션 래퍼
+    ═══════════════════════════════════ */
+    .section { padding: 64px 24px; }
+    .section-alt { background: var(--bg-surface); }
+    .container { max-width: 960px; margin: 0 auto; }
+    .container-lg { max-width: 1100px; margin: 0 auto; }
+    .section-head { text-align: center; margin-bottom: 40px; }
+    .section-head h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; margin-bottom: 8px; }
+    .section-head h2 em { color: var(--accent); font-style: normal; }
+    .section-head p { color: var(--text-2); font-size: 15px; }
+    .divider { width: 48px; height: 3px; background: var(--accent); border-radius: 2px; margin: 12px auto 0; }
+
+    /* ═══════════════════════════════════
+       게임 영역
+    ═══════════════════════════════════ */
+    #game { padding: 56px 24px; }
+    .game-wrap {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      max-width: 480px; margin: 0 auto;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    .game-header { text-align: center; margin-bottom: 20px; }
+    .game-header h3 { font-size: 18px; font-weight: 700; }
+    .game-header h3 em { color: var(--accent); font-style: normal; }
+    .game-header p { color: var(--text-3); font-size: 12px; margin-top: 3px; }
+
+    /* 단계 표시 */
+    .stage-bar { display: flex; justify-content: center; align-items: center; gap: 2px; margin-bottom: 4px; }
     .stage-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #0f3460;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--bg-card);
       transition: background 0.3s, transform 0.3s;
     }
-    .stage-dot.active { background: #4ade80; transform: scale(1.45); }
+    .stage-dot.active { background: var(--accent); transform: scale(1.45); }
     .stage-dot.done   { background: #2d6a4f; }
-    .stage-lbl {
-      color: #3a4a60; font-size: 12px; font-weight: 600; padding: 0 3px;
-      transition: color 0.3s;
-    }
-    .stage-lbl.active { color: #4ade80; }
+    .stage-lbl { color: var(--text-3); font-size: 12px; font-weight: 600; padding: 0 3px; transition: color 0.3s; }
+    .stage-lbl.active { color: var(--accent); }
     .stage-lbl.done   { color: #2d6a4f; }
-    .stage-sep { color: #2d3748; font-size: 11px; padding: 0 1px; }
+    .stage-sep { color: var(--text-3); font-size: 11px; padding: 0 1px; }
 
-    /* ─── 커뮤니티 카드 ─── */
-    .community-section {
-      background: #0a2540;
-      border-radius: 16px;
-      padding: 14px 16px 16px;
-      border: 1px solid #1e4d8c;
+    /* 커뮤니티 카드 */
+    .community-box {
+      background: var(--bg-deep);
+      border-radius: 14px; padding: 14px 16px 16px;
+      border: 1px solid var(--border); margin-bottom: 14px;
     }
-    .section-lbl {
-      text-align: center;
-      color: #718096;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 10px;
+    .box-lbl {
+      text-align: center; color: var(--text-3);
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: 1.5px; margin-bottom: 10px;
     }
     .cards-row {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      min-height: 88px;
-      align-items: center;
-      flex-wrap: wrap;
+      display: flex; justify-content: center; gap: 8px;
+      min-height: 86px; align-items: center; flex-wrap: wrap;
     }
 
-    /* ─── 카드 ─── */
+    /* 카드 */
     .card {
-      width: 58px; height: 84px;
-      background: #ffffff;
+      width: 56px; height: 82px;
+      background: var(--card-white);
       border-radius: 7px;
       display: flex; flex-direction: column;
       justify-content: space-between;
       padding: 4px 5px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.45);
-      font-weight: 800;
-      flex-shrink: 0;
-      animation: dealCard 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px var(--card-shadow);
+      font-weight: 800; flex-shrink: 0;
+      animation: dealCard 0.38s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .card .top { font-size: 15px; line-height: 1.15; }
-    .card .mid { font-size: 22px; text-align: center; line-height: 1; }
-    .card .bot { font-size: 15px; line-height: 1.15; text-align: right; transform: rotate(180deg); }
+    .card .top { font-size: 14px; line-height: 1.15; color: inherit; }
+    .card .mid { font-size: 21px; text-align: center; line-height: 1; color: inherit; }
+    .card .bot { font-size: 14px; line-height: 1.15; text-align: right; transform: rotate(180deg); color: inherit; }
     .card.red   { color: #dc2626; }
     .card.black { color: #111827; }
-
     .card-slot {
-      width: 58px; height: 84px;
-      border-radius: 7px;
-      border: 2px dashed #1a4080;
-      background: rgba(15, 52, 96, 0.18);
-      flex-shrink: 0;
+      width: 56px; height: 82px; border-radius: 7px;
+      border: 2px dashed var(--border);
+      background: rgba(15,52,96,0.15); flex-shrink: 0;
     }
-
     @keyframes dealCard {
       from { transform: scale(0.35) translateY(-50px) rotate(-6deg); opacity: 0; }
-      to   { transform: scale(1)    translateY(0)     rotate(0);     opacity: 1; }
+      to   { transform: scale(1) translateY(0) rotate(0); opacity: 1; }
     }
 
-    /* ─── 승률 ─── */
-    .wr-section { display: flex; flex-direction: column; gap: 6px; padding: 0 2px; }
-    .wr-top     { display: flex; justify-content: space-between; align-items: baseline; }
-    .wr-title   { color: #718096; font-size: 12.5px; }
-    .wr-pct     { color: #4ade80; font-size: 26px; font-weight: 800; transition: color 0.3s; }
-    .wr-pct.calc { color: #4a5568; font-size: 14px; align-self: center; }
-    .wr-track   { background: #0f3460; border-radius: 999px; height: 10px; overflow: hidden; }
-    .wr-fill    {
+    /* 승률 바 */
+    .wr-box { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .wr-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .wr-title { color: var(--text-2); font-size: 12px; }
+    .wr-pct { color: var(--accent); font-size: 26px; font-weight: 800; transition: color 0.3s; }
+    .wr-pct.calc { color: var(--text-3); font-size: 14px; align-self: center; }
+    .wr-track { background: var(--bg-card); border-radius: 999px; height: 10px; overflow: hidden; }
+    .wr-fill {
       height: 100%; border-radius: 999px;
-      background: linear-gradient(90deg, #22c55e, #4ade80);
-      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
     }
-    .wr-sub { color: #3a4a60; font-size: 11px; text-align: right; min-height: 15px; }
+    .wr-sub { color: var(--text-3); font-size: 11px; text-align: right; min-height: 14px; }
 
-    /* ─── 아웃츠 ─── */
-    .outs-section {
-      background: #0f1f35;
-      border-radius: 12px;
-      padding: 12px 14px;
-      border: 1px solid #1a3a5c;
+    /* 아웃츠 */
+    .outs-box {
+      background: var(--bg-deep); border-radius: var(--radius-md);
+      padding: 12px 14px; border: 1px solid var(--border); margin-bottom: 14px;
     }
-    .outs-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 9px;
-    }
-    .outs-title { color: #718096; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
-    .outs-summary { display: flex; align-items: baseline; gap: 8px; }
-    .outs-num  { color: #e2e8f0; font-size: 22px; font-weight: 800; }
-    .outs-prob-label { color: #718096; font-size: 12px; }
-    .outs-prob { color: #fbbf24; font-weight: 700; font-size: 14px; }
-    .outs-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
+    .outs-hd { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .outs-ttl { color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
+    .outs-sum { display: flex; align-items: baseline; gap: 6px; }
+    .outs-num { color: var(--text-1); font-size: 22px; font-weight: 800; }
+    .outs-plbl { color: var(--text-2); font-size: 12px; }
+    .outs-prob { color: var(--warn); font-weight: 700; font-size: 13px; }
+    .outs-list { display: flex; flex-wrap: wrap; gap: 6px; }
     .out-tag {
-      background: rgba(30, 77, 140, 0.45);
-      border: 1px solid #1e4d8c;
-      color: #90cdf4;
-      border-radius: 6px;
-      padding: 4px 9px;
-      font-size: 12px;
-      font-weight: 500;
+      background: rgba(30,77,140,0.4); border: 1px solid var(--border);
+      color: var(--info); border-radius: 6px; padding: 3px 8px;
+      font-size: 12px; font-weight: 500;
     }
-    .out-tag .oc { color: #4ade80; font-weight: 700; }
-    .outs-none { color: #4a5568; font-size: 13px; font-style: italic; }
+    .out-tag .oc { color: var(--accent); font-weight: 700; }
+    .outs-none { color: var(--text-3); font-size: 13px; font-style: italic; }
 
-    /* ─── 내 패 ─── */
-    .player-section { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .hand-name { font-size: 16px; font-weight: 700; color: #fbbf24; min-height: 22px; text-align: center; }
+    /* 내 패 */
+    .player-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .hand-name { font-size: 16px; font-weight: 700; color: var(--warn); min-height: 22px; }
 
-    /* ─── 버튼 ─── */
-    .action-area { display: flex; gap: 10px; }
-    .btn {
-      flex: 1; padding: 13px; border-radius: 12px;
-      font-size: 16px; font-weight: 700;
-      border: none; cursor: pointer;
+    /* 액션 버튼 */
+    .action-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .gbtn {
+      flex: 1; padding: 13px; border-radius: var(--radius-md);
+      font-size: 16px; font-weight: 700; border: none; cursor: pointer;
       transition: background 0.12s, transform 0.1s;
-      letter-spacing: 0.2px;
     }
-    .btn:active  { transform: scale(0.95); }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    .btn-call  { background: #4ade80; color: #0d1f0d; }
-    .btn-call:hover:not(:disabled)  { background: #22c55e; }
-    .btn-fold  { background: #e94560; color: #fff; }
-    .btn-fold:hover:not(:disabled)  { background: #ff4d6d; }
-    .btn-next  { background: #0f3460; color: #7ecaef; border: 1px solid #1e4d8c; }
-    .btn-next:hover:not(:disabled)  { background: #1a4f85; }
-    .btn-new   { background: #1a1a4e; color: #e2e8f0; border: 1px solid #2d3a6a; }
-    .btn-new:hover:not(:disabled)   { background: #22226e; }
+    .gbtn:active  { transform: scale(0.95); }
+    .gbtn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .gbtn-call  { background: var(--accent);  color: #0d1f0d; }
+    .gbtn-call:hover:not(:disabled)  { background: var(--accent2); }
+    .gbtn-fold  { background: var(--danger);  color: #fff; }
+    .gbtn-fold:hover:not(:disabled)  { background: #ff4d6d; }
+    .gbtn-next  { background: var(--bg-card); color: var(--info); border: 1px solid var(--border); }
+    .gbtn-next:hover:not(:disabled)  { background: #1a4f85; }
+    .gbtn-new   { background: var(--bg-deep); color: var(--text-1); border: 1px solid var(--border); }
+    .gbtn-new:hover:not(:disabled)   { background: var(--bg-card); }
 
-    /* ─── 결과 ─── */
-    .result-area {
-      border-radius: 12px; padding: 13px 16px;
+    /* 결과 */
+    .result-box {
+      border-radius: var(--radius-md); padding: 13px 16px;
       text-align: center; font-size: 17px; font-weight: 700;
       min-height: 50px; display: flex; align-items: center; justify-content: center;
       opacity: 0; transition: opacity 0.3s;
     }
-    .result-area.vis { opacity: 1; }
-    .result-done { background: rgba(74,222,128,0.13); color: #4ade80; }
-    .result-fold { background: rgba(160,174,192,0.08); color: #9ca3af; }
-    .result-info { background: rgba(15,52,96,0.55); color: #90cdf4; }
+    .result-box.vis { opacity: 1; }
+    .res-done { background: rgba(74,222,128,0.12); color: var(--accent); }
+    .res-fold { background: rgba(160,174,192,0.07); color: var(--text-2); }
+    .res-info { background: rgba(15,52,96,0.5); color: var(--info); }
+
+    /* ═══════════════════════════════════
+       패 랭킹 테이블
+    ═══════════════════════════════════ */
+    .rank-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .rank-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex; align-items: flex-start; gap: 14px;
+      transition: border-color 0.2s;
+    }
+    .rank-card:hover { border-color: var(--accent); }
+    .rank-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--bg-card);
+      color: var(--accent); font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .rank-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .rank-info p  { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+    .rank-ex { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+
+    /* ═══════════════════════════════════
+       전략 카드
+    ═══════════════════════════════════ */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .strategy-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+    .strategy-icon {
+      font-size: 30px; margin-bottom: 12px;
+      display: block;
+    }
+    .strategy-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .strategy-card p  { font-size: 14px; color: var(--text-2); line-height: 1.7; }
+    .strategy-card ul { font-size: 14px; color: var(--text-2); padding-left: 18px; line-height: 2; }
+    .tip-box {
+      background: rgba(74,222,128,0.08);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 10px 14px; margin-top: 12px;
+      font-size: 13px; color: var(--text-2);
+    }
+    .tip-box strong { color: var(--accent); }
+
+    /* ═══════════════════════════════════
+       자주 묻는 질문
+    ═══════════════════════════════════ */
+    .faq-list { display: flex; flex-direction: column; gap: 12px; max-width: 760px; margin: 0 auto; }
+    .faq-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .faq-q {
+      width: 100%; background: none; border: none;
+      padding: 16px 20px; text-align: left;
+      font-size: 15px; font-weight: 600; color: var(--text-1);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      gap: 12px;
+    }
+    .faq-q:hover { color: var(--accent); }
+    .faq-q .arrow { transition: transform 0.2s; font-size: 12px; color: var(--text-3); flex-shrink: 0; }
+    .faq-q.open .arrow { transform: rotate(180deg); }
+    .faq-a {
+      padding: 0 20px; max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s;
+      font-size: 14px; color: var(--text-2); line-height: 1.75;
+    }
+    .faq-a.open { max-height: 300px; padding: 0 20px 16px; }
+
+    /* ═══════════════════════════════════
+       소개 섹션
+    ═══════════════════════════════════ */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px; align-items: center;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+    .about-text h2 { font-size: 26px; font-weight: 800; margin-bottom: 14px; }
+    .about-text h2 em { color: var(--accent); font-style: normal; }
+    .about-text p { font-size: 15px; color: var(--text-2); margin-bottom: 12px; }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .feature-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text-2);
+    }
+    .feature-list li::before {
+      content: "✓"; color: var(--accent); font-weight: 800;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .about-visual {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px; text-align: center;
+    }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .stat-item {
+      background: var(--bg-deep);
+      border-radius: var(--radius-md);
+      padding: 18px; text-align: center;
+    }
+    .stat-item strong { display: block; font-size: 28px; font-weight: 800; color: var(--accent); }
+    .stat-item span { font-size: 12px; color: var(--text-3); }
+
+    /* ═══════════════════════════════════
+       개인정보처리방침
+    ═══════════════════════════════════ */
+    .privacy-content {
+      max-width: 760px; margin: 0 auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 40px;
+    }
+    @media (max-width: 600px) { .privacy-content { padding: 24px 20px; } }
+    .privacy-content h3 { font-size: 17px; font-weight: 700; margin: 24px 0 8px; color: var(--accent); }
+    .privacy-content h3:first-child { margin-top: 0; }
+    .privacy-content p  { font-size: 14px; color: var(--text-2); line-height: 1.8; margin-bottom: 8px; }
+    .privacy-content ul { font-size: 14px; color: var(--text-2); padding-left: 20px; line-height: 2; }
+
+    /* ═══════════════════════════════════
+       푸터
+    ═══════════════════════════════════ */
+    .footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      padding: 40px 24px 28px;
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 640px) { .footer-inner { grid-template-columns: 1fr; } }
+    .footer-brand h4 { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+    .footer-brand h4 span { color: var(--accent); }
+    .footer-brand p { font-size: 13px; color: var(--text-3); line-height: 1.7; }
+    .footer-col h5 { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-col ul li a { font-size: 13px; color: var(--text-3); transition: color 0.15s; }
+    .footer-col ul li a:hover { color: var(--accent); text-decoration: none; }
+    .footer-bottom {
+      max-width: 1100px; margin: 28px auto 0;
+      padding-top: 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-3); flex-wrap: wrap; gap: 8px;
+    }
+
+    /* ═══════════════════════════════════
+       반응형
+    ═══════════════════════════════════ */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero { padding: 40px 20px 36px; }
+    }
+    @media (max-width: 480px) {
+      .section { padding: 44px 16px; }
+      .rank-grid, .strategy-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-<div id="game-container">
 
-  <div class="header">
-    <h1>텍사스 <em>홀덤</em> 연습</h1>
-    <p>랜덤 상대 1명 기준 승률 계산</p>
+<!-- ══════════ 내비게이션 ══════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">홀덤 <span>연습소</span></a>
+    <ul class="nav-links">
+      <li><a href="#game">핸드 분석기</a></li>
+      <li><a href="#rules">패 랭킹</a></li>
+      <li><a href="#strategy">전략 가이드</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#about">소개</a></li>
+      <li><a href="#privacy">개인정보처리방침</a></li>
+    </ul>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀️ 라이트 모드</button>
   </div>
+</nav>
 
-  <div id="stage-bar" class="stage-bar"></div>
-
-  <div class="community-section">
-    <div class="section-lbl">커뮤니티 카드</div>
-    <div id="community-cards" class="cards-row"></div>
-  </div>
-
-  <div class="wr-section">
-    <div class="wr-top">
-      <span class="wr-title">승리 확률</span>
-      <span id="wr-pct" class="wr-pct">—</span>
+<!-- ══════════ 히어로 ══════════ -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="hero-badge">무료 포커 연습 도구</div>
+    <h1>텍사스 <em>홀덤</em> 핸드 분석기</h1>
+    <p>내 패의 승률과 아웃츠를 실시간으로 계산하고, 플랍·턴·리버를 단계별로 연습하세요. 포커 실력 향상을 위한 최고의 무료 도구입니다.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('game').scrollIntoView({behavior:'smooth'})">지금 연습하기</button>
+      <button class="btn-outline" onclick="document.getElementById('rules').scrollIntoView({behavior:'smooth'})">패 랭킹 보기</button>
     </div>
-    <div class="wr-track"><div id="wr-fill" class="wr-fill" style="width:0%"></div></div>
-    <div id="wr-sub" class="wr-sub"></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>10가지</strong><span>패 조합 분석</span></div>
+      <div class="hero-stat"><strong>실시간</strong><span>승률 계산</span></div>
+      <div class="hero-stat"><strong>무료</strong><span>제한 없이 연습</span></div>
+    </div>
   </div>
+</section>
 
-  <div id="outs-section" class="outs-section" style="display:none">
-    <div class="outs-header">
-      <span class="outs-title">아웃츠</span>
-      <div class="outs-summary">
-        <span id="outs-num" class="outs-num">0</span>
-        <span class="outs-prob-label">장 &nbsp;|&nbsp; 다음 카드 힛 확률 <span id="outs-prob" class="outs-prob">0%</span></span>
+<!-- ══════════ 핸드 분석기 (게임) ══════════ -->
+<section id="game" class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>텍사스 홀덤 <em>핸드 분석기</em></h2>
+      <p>카드를 받고 승률과 아웃츠를 확인한 뒤, 콜 또는 폴드를 선택하세요.</p>
+      <div class="divider"></div>
+    </div>
+    <div class="game-wrap">
+      <div class="game-header">
+        <h3>텍사스 <em>홀덤</em> 연습</h3>
+        <p>랜덤 상대 1명 기준 승률 계산</p>
+      </div>
+      <div id="stage-bar" class="stage-bar" style="margin-bottom:16px"></div>
+      <div class="community-box">
+        <div class="box-lbl">커뮤니티 카드</div>
+        <div id="community-cards" class="cards-row"></div>
+      </div>
+      <div class="wr-box">
+        <div class="wr-top">
+          <span class="wr-title">승리 확률</span>
+          <span id="wr-pct" class="wr-pct">—</span>
+        </div>
+        <div class="wr-track"><div id="wr-fill" class="wr-fill" style="width:0%"></div></div>
+        <div id="wr-sub" class="wr-sub"></div>
+      </div>
+      <div id="outs-section" class="outs-box" style="display:none">
+        <div class="outs-hd">
+          <span class="outs-ttl">아웃츠</span>
+          <div class="outs-sum">
+            <span id="outs-num" class="outs-num">0</span>
+            <span class="outs-plbl">장 &nbsp;|&nbsp; 힛 확률 <span id="outs-prob" class="outs-prob">0%</span></span>
+          </div>
+        </div>
+        <div id="outs-list" class="outs-list"></div>
+      </div>
+      <div class="player-box">
+        <div class="box-lbl">내 패</div>
+        <div id="player-cards" class="cards-row"></div>
+        <div id="hand-name" class="hand-name"></div>
+      </div>
+      <div id="action-area" class="action-row"></div>
+      <div id="result-area" class="result-box"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 패 랭킹 ══════════ -->
+<section id="rules" class="section section-alt">
+  <div class="container-lg">
+    <div class="section-head">
+      <h2>텍사스 홀덤 <em>패 랭킹</em></h2>
+      <p>강한 패부터 약한 패 순서로 정리한 10가지 핸드 조합입니다.</p>
+      <div class="divider"></div>
+    </div>
+    <div class="rank-grid">
+      <div class="rank-card"><div class="rank-num">1</div><div class="rank-info"><h4>로얄 플러시</h4><p>같은 무늬의 A·K·Q·J·10 조합. 포커에서 가장 강한 패.</p><div class="rank-ex">A♠ K♠ Q♠ J♠ 10♠</div></div></div>
+      <div class="rank-card"><div class="rank-num">2</div><div class="rank-info"><h4>스트레이트 플러시</h4><p>같은 무늬의 연속된 5장. 로얄 플러시를 제외한 최강 패.</p><div class="rank-ex">9♥ 8♥ 7♥ 6♥ 5♥</div></div></div>
+      <div class="rank-card"><div class="rank-num">3</div><div class="rank-info"><h4>포카드 (Four of a Kind)</h4><p>같은 숫자 4장. 매우 희귀하고 강력한 패.</p><div class="rank-ex">K♠ K♥ K♦ K♣ 3♠</div></div></div>
+      <div class="rank-card"><div class="rank-num">4</div><div class="rank-info"><h4>풀하우스</h4><p>트리플 1개 + 페어 1개 조합. 안정적인 강패.</p><div class="rank-ex">Q♠ Q♥ Q♦ 7♠ 7♥</div></div></div>
+      <div class="rank-card"><div class="rank-num">5</div><div class="rank-info"><h4>플러시 (Flush)</h4><p>같은 무늬 5장. 연속될 필요는 없음.</p><div class="rank-ex">A♣ J♣ 8♣ 5♣ 2♣</div></div></div>
+      <div class="rank-card"><div class="rank-num">6</div><div class="rank-info"><h4>스트레이트</h4><p>무늬 상관없이 연속된 숫자 5장.</p><div class="rank-ex">9♠ 8♥ 7♦ 6♣ 5♠</div></div></div>
+      <div class="rank-card"><div class="rank-num">7</div><div class="rank-info"><h4>트리플 (Three of a Kind)</h4><p>같은 숫자 3장. 원페어보다 강하고 흔한 편.</p><div class="rank-ex">J♠ J♥ J♦ A♣ 4♠</div></div></div>
+      <div class="rank-card"><div class="rank-num">8</div><div class="rank-info"><h4>투페어 (Two Pair)</h4><p>페어 2개 조합. 초보자가 자주 완성하는 패.</p><div class="rank-ex">10♠ 10♥ 6♦ 6♣ K♠</div></div></div>
+      <div class="rank-card"><div class="rank-num">9</div><div class="rank-info"><h4>원페어 (One Pair)</h4><p>같은 숫자 2장. 가장 자주 나오는 패.</p><div class="rank-ex">A♠ A♥ K♦ 9♣ 3♠</div></div></div>
+      <div class="rank-card"><div class="rank-num">10</div><div class="rank-info"><h4>하이카드 (High Card)</h4><p>어떤 조합도 없을 때 가장 높은 카드로 비교.</p><div class="rank-ex">A♠ J♦ 9♣ 6♥ 2♠</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 전략 가이드 ══════════ -->
+<section id="strategy" class="section">
+  <div class="container-lg">
+    <div class="section-head">
+      <h2>포커 <em>전략 가이드</em></h2>
+      <p>승률을 높이기 위한 핵심 전략을 알아보세요.</p>
+      <div class="divider"></div>
+    </div>
+    <div class="strategy-grid">
+      <div class="strategy-card">
+        <span class="strategy-icon">🃏</span>
+        <h3>스타팅 핸드 선택</h3>
+        <p>프리플랍에서 어떤 패를 플레이할지 결정하는 것이 가장 중요합니다. 강한 핸드만 선택적으로 플레이하는 것이 초보자에게 유리합니다.</p>
+        <ul>
+          <li>포켓 페어 (AA, KK, QQ) — 최강 스타팅 핸드</li>
+          <li>AK, AQ 수티드 — 강력한 브로드웨이 핸드</li>
+          <li>수티드 커넥터 — 플러시·스트레이트 가능성</li>
+        </ul>
+        <div class="tip-box"><strong>Tip:</strong> 약한 핸드는 과감히 폴드하세요. 칩을 아끼는 것도 전략입니다.</div>
+      </div>
+      <div class="strategy-card">
+        <span class="strategy-icon">📍</span>
+        <h3>포지션의 중요성</h3>
+        <p>포커에서 포지션은 매우 중요합니다. 늦게 행동할수록 더 많은 정보를 갖고 결정할 수 있어 유리합니다.</p>
+        <ul>
+          <li>딜러 버튼(BTN) — 가장 유리한 포지션</li>
+          <li>컷오프(CO), 하이잭(HJ) — 두 번째로 유리</li>
+          <li>얼리 포지션(EP) — 신중한 플레이 필요</li>
+        </ul>
+        <div class="tip-box"><strong>Tip:</strong> 후반 포지션에서는 더 넓은 핸드 레인지로 플레이 가능합니다.</div>
+      </div>
+      <div class="strategy-card">
+        <span class="strategy-icon">🔢</span>
+        <h3>아웃츠와 팟 오즈</h3>
+        <p>아웃츠(Outs)는 내 패를 완성시켜 줄 남은 카드의 수입니다. 팟 오즈와 비교해 콜 여부를 판단합니다.</p>
+        <ul>
+          <li>플러시 드로우: 9 아웃츠</li>
+          <li>오픈엔드 스트레이트: 8 아웃츠</li>
+          <li>거트샷 스트레이트: 4 아웃츠</li>
+        </ul>
+        <div class="tip-box"><strong>룰 오브 4와 2:</strong> 아웃츠 × 4 = 플랍 이후 두 장에서 힛 확률, 아웃츠 × 2 = 한 장에서 힛 확률.</div>
+      </div>
+      <div class="strategy-card">
+        <span class="strategy-icon">🎭</span>
+        <h3>블러프 전략</h3>
+        <p>블러프는 약한 패로 강한 패처럼 보이게 하는 기술입니다. 무작정 블러프는 금물이며, 상황을 읽는 것이 핵심입니다.</p>
+        <ul>
+          <li>세미 블러프: 드로우 핸드일 때 베팅</li>
+          <li>상대방 핸드 레인지 파악 후 블러프</li>
+          <li>타이트한 이미지 구축 후 블러프 시도</li>
+        </ul>
+        <div class="tip-box"><strong>Tip:</strong> 초보자는 세미 블러프(아웃츠가 있는 상태)만 활용하는 것을 권장합니다.</div>
+      </div>
+      <div class="strategy-card">
+        <span class="strategy-icon">💰</span>
+        <h3>뱅크롤 관리</h3>
+        <p>장기적으로 수익을 내려면 뱅크롤 관리가 필수입니다. 감정적인 플레이를 방지하고 지속 가능한 게임을 유지합니다.</p>
+        <ul>
+          <li>한 세션에 뱅크롤의 5% 이상 투입 금지</li>
+          <li>틸트(감정적 플레이) 발생 시 즉시 휴식</li>
+          <li>스테이크 레벨을 천천히 올릴 것</li>
+        </ul>
+        <div class="tip-box"><strong>Tip:</strong> 결과보다 의사결정의 질에 집중하세요. 좋은 결정이 장기적 수익을 만듭니다.</div>
+      </div>
+      <div class="strategy-card">
+        <span class="strategy-icon">👁️</span>
+        <h3>상대방 읽기</h3>
+        <p>상대방의 베팅 패턴, 타이밍, 행동을 관찰하면 핸드 레인지를 좁힐 수 있습니다.</p>
+        <ul>
+          <li>빠른 콜 → 드로우 핸드 가능성</li>
+          <li>프리플랍 3벳 → 강한 핸드 또는 블러프</li>
+          <li>체크레이즈 → 강한 메이드 핸드 신호</li>
+        </ul>
+        <div class="tip-box"><strong>Tip:</strong> 핸드를 폴드한 후에도 상대방을 관찰하며 패턴을 파악하세요.</div>
       </div>
     </div>
-    <div id="outs-list" class="outs-list"></div>
   </div>
+</section>
 
-  <div class="player-section">
-    <div class="section-lbl">내 패</div>
-    <div id="player-cards" class="cards-row"></div>
-    <div id="hand-name" class="hand-name"></div>
+<!-- ══════════ FAQ ══════════ -->
+<section id="faq" class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>자주 묻는 <em>질문</em></h2>
+      <p>텍사스 홀덤 연습에 관해 궁금한 점을 모았습니다.</p>
+      <div class="divider"></div>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">승률 계산은 어떻게 이루어지나요? <span class="arrow">▼</span></button>
+        <div class="faq-a">몬테카를로 시뮬레이션 방식을 사용합니다. 남은 덱에서 랜덤으로 상대방 카드와 커뮤니티 카드를 배분해 수천 번 반복 시뮬레이션하여 승률을 계산합니다. 랜덤 상대 1명을 기준으로 합니다.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">아웃츠(Outs)란 무엇인가요? <span class="arrow">▼</span></button>
+        <div class="faq-a">아웃츠는 현재 내 패보다 더 좋은 패로 만들어 줄 수 있는 남은 덱의 카드 수입니다. 예를 들어 플러시 드로우가 있다면 같은 무늬 카드 9장이 아웃츠가 됩니다. 아웃츠가 많을수록 패가 좋아질 가능성이 높습니다.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">수티드(Suited)와 오프수트(Offsuit)의 차이는? <span class="arrow">▼</span></button>
+        <div class="faq-a">수티드는 두 홀 카드의 무늬가 같은 경우입니다. 플러시나 플러시 드로우를 만들 가능성이 생기기 때문에 같은 숫자의 오프수트 핸드보다 약 2~4% 정도 승률이 높습니다.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">포켓 페어(Pocket Pair)가 유리한 이유는? <span class="arrow">▼</span></button>
+        <div class="faq-a">포켓 페어는 이미 원페어를 가진 상태로 시작합니다. 셋(트리플)이나 풀하우스, 포카드로 발전할 가능성이 있어 강력한 스타팅 핸드입니다. 특히 AA, KK, QQ 등 하이 포켓 페어는 프리플랍 승률이 80% 이상입니다.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">이 도구는 실제 포커 전략 연습에 도움이 되나요? <span class="arrow">▼</span></button>
+        <div class="faq-a">네, 이 도구는 핸드별 승률, 아웃츠 계산, 단계별 커뮤니티 카드 공개 등 실제 포커 상황을 시뮬레이션합니다. 콜과 폴드 결정 연습, 아웃츠 이해에 매우 유용합니다. 다만 실제 게임에서는 상대방 읽기, 포지션, 베팅 크기 등 추가 요소도 고려해야 합니다.</div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div id="action-area" class="action-area"></div>
+<!-- ══════════ 소개 ══════════ -->
+<section id="about" class="section">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text">
+        <h2>홀덤 <em>연습소</em>란?</h2>
+        <p>홀덤 연습소는 텍사스 홀덤 포커를 배우고 연습하려는 모든 분들을 위해 만든 무료 핸드 분석 도구입니다.</p>
+        <p>복잡한 가입 절차나 설치 없이 브라우저에서 바로 사용할 수 있으며, 실시간 승률 계산과 아웃츠 분석으로 포커 실력 향상을 돕습니다.</p>
+        <ul class="feature-list">
+          <li>몬테카를로 시뮬레이션 기반 정확한 승률 계산</li>
+          <li>플랍·턴·리버 단계별 아웃츠 실시간 분석</li>
+          <li>10가지 패 조합 자동 인식 및 표시</li>
+          <li>완전 무료, 광고 없는 깔끔한 인터페이스</li>
+          <li>다크/라이트 모드 지원</li>
+        </ul>
+      </div>
+      <div class="about-visual">
+        <div class="stat-grid">
+          <div class="stat-item"><strong>52</strong><span>장의 표준 덱</span></div>
+          <div class="stat-item"><strong>10</strong><span>가지 패 조합</span></div>
+          <div class="stat-item"><strong>1500+</strong><span>회 시뮬레이션</span></div>
+          <div class="stat-item"><strong>100%</strong><span>무료 서비스</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <div id="result-area" class="result-area"></div>
+<!-- ══════════ 개인정보처리방침 ══════════ -->
+<section id="privacy" class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2><em>개인정보</em>처리방침</h2>
+      <p>최종 수정일: 2025년 5월 6일</p>
+      <div class="divider"></div>
+    </div>
+    <div class="privacy-content">
+      <h3>1. 개인정보 수집 안내</h3>
+      <p>홀덤 연습소(이하 "본 사이트")는 별도의 회원가입이나 개인정보를 수집하지 않습니다. 모든 게임 데이터는 사용자의 브라우저 내에서만 처리되며 서버로 전송되지 않습니다.</p>
 
-</div>
+      <h3>2. 쿠키 및 로컬 스토리지 사용</h3>
+      <p>본 사이트는 사용자의 테마(다크/라이트 모드) 설정을 기억하기 위해 브라우저의 로컬 스토리지(localStorage)를 사용합니다. 이는 사용자의 편의를 위한 것으로, 개인 식별 정보를 포함하지 않습니다.</p>
+
+      <h3>3. Google AdSense 및 제3자 광고</h3>
+      <p>본 사이트는 Google AdSense를 통해 광고를 게재할 수 있습니다. Google은 광고 서비스 제공을 위해 쿠키를 사용합니다.</p>
+      <ul>
+        <li>Google은 광고 게재를 위해 DART 쿠키를 사용합니다.</li>
+        <li>사용자는 Google 광고 설정 페이지에서 맞춤 광고를 비활성화할 수 있습니다.</li>
+        <li>자세한 내용은 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a>을 참고하세요.</li>
+      </ul>
+
+      <h3>4. 제3자 서비스</h3>
+      <p>본 사이트는 아래와 같은 제3자 서비스를 사용할 수 있으며, 각 서비스의 개인정보처리방침이 적용됩니다.</p>
+      <ul>
+        <li>Google AdSense (광고 서비스)</li>
+        <li>Google Analytics (방문자 통계, 선택적 적용)</li>
+      </ul>
+
+      <h3>5. 아동 개인정보 보호</h3>
+      <p>본 사이트는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.</p>
+
+      <h3>6. 개인정보처리방침 변경</h3>
+      <p>본 방침은 법령 변경, 서비스 변경 등에 따라 업데이트될 수 있습니다. 변경 시 본 페이지에 최신 내용을 공지합니다.</p>
+
+      <h3>7. 문의</h3>
+      <p>개인정보 관련 문의 사항은 아래 이메일로 연락해주시기 바랍니다.</p>
+      <p>이메일: <a href="mailto:km941231@gmail.com">km941231@gmail.com</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 푸터 ══════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h4>홀덤 <span>연습소</span></h4>
+      <p>텍사스 홀덤 포커 실력 향상을 위한<br>무료 핸드 분석 도구를 제공합니다.</p>
+    </div>
+    <div class="footer-col">
+      <h5>바로가기</h5>
+      <ul>
+        <li><a href="#game">핸드 분석기</a></li>
+        <li><a href="#rules">패 랭킹</a></li>
+        <li><a href="#strategy">전략 가이드</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>정보</h5>
+      <ul>
+        <li><a href="#about">사이트 소개</a></li>
+        <li><a href="#privacy">개인정보처리방침</a></li>
+        <li><a href="mailto:km941231@gmail.com">문의하기</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 홀덤 연습소. All rights reserved.</span>
+    <span>본 사이트는 교육 목적의 포커 연습 도구입니다.</span>
+  </div>
+</footer>
+
+<!-- ══════════ JavaScript ══════════ -->
 <script>
 'use strict';
 
+/* ─── 테마 ─── */
+(function() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = saved === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+})();
+
+function toggleTheme() {
+  const cur  = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+}
+
+/* ─── FAQ ─── */
+function toggleFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a.open').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.faq-q.open').forEach(el => el.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+
+/* ─── 상수 ─── */
 const SUITS  = ['♠','♥','♦','♣'];
 const VALUES = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
 const RANK   = Object.fromEntries(VALUES.map((v, i) => [v, i + 2]));
-const HAND_NAMES = [
-  '하이카드','원페어','투페어','트리플',
-  '스트레이트','플러시','풀하우스',
-  '포카드','스트레이트 플러시','로얄 플러시'
-];
-const STAGES = [
-  { key:'PREFLOP', lbl:'프리플랍' },
-  { key:'FLOP',    lbl:'플랍' },
-  { key:'TURN',    lbl:'턴' },
-  { key:'RIVER',   lbl:'리버' }
-];
-const STAGE_IDX = { PREFLOP:0, FLOP:1, TURN:2, RIVER:3, DONE:4, FOLD:-1, IDLE:-1 };
+const HAND_NAMES = ['하이카드','원페어','투페어','트리플','스트레이트','플러시','풀하우스','포카드','스트레이트 플러시','로얄 플러시'];
+const STAGES = [{key:'PREFLOP',lbl:'프리플랍'},{key:'FLOP',lbl:'플랍'},{key:'TURN',lbl:'턴'},{key:'RIVER',lbl:'리버'}];
+const STAGE_IDX = {PREFLOP:0,FLOP:1,TURN:2,RIVER:3,DONE:4,FOLD:-1,IDLE:-1};
 
-function createDeck() {
-  return SUITS.flatMap(s => VALUES.map(v => ({ suit: s, value: v, rank: RANK[v] })));
-}
-function shuffle(deck) {
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+/* ─── 덱 ─── */
+function createDeck() { return SUITS.flatMap(s => VALUES.map(v => ({suit:s,value:v,rank:RANK[v]}))); }
+function shuffle(d) {
+  for (let i = d.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [d[i],d[j]] = [d[j],d[i]];
   }
-  return deck;
+  return d;
 }
-function deal(deck, n) { return deck.splice(0, n); }
+function deal(d, n) { return d.splice(0, n); }
 
+/* ─── 패 평가 ─── */
 function combos(arr, k) {
   const res = [];
   (function go(s, cur) {
-    if (cur.length === k) { res.push(cur.slice()); return; }
-    for (let i = s; i < arr.length; i++) { cur.push(arr[i]); go(i+1, cur); cur.pop(); }
+    if (cur.length===k) { res.push(cur.slice()); return; }
+    for (let i=s; i<arr.length; i++) { cur.push(arr[i]); go(i+1,cur); cur.pop(); }
   })(0, []);
   return res;
 }
-
 function evalFive(cards) {
-  const r = cards.map(c => c.rank).sort((a, b) => b - a);
-  const s = cards.map(c => c.suit);
-  const flush = s.every(x => x === s[0]);
-
-  let str = false, strHi = 0;
-  if (new Set(r).size === 5) {
-    if (r[0] - r[4] === 4)                                       { str = true; strHi = r[0]; }
-    else if (r[0]===14&&r[1]===5&&r[2]===4&&r[3]===3&&r[4]===2) { str = true; strHi = 5; }
+  const r = cards.map(c=>c.rank).sort((a,b)=>b-a);
+  const s = cards.map(c=>c.suit);
+  const flush = s.every(x=>x===s[0]);
+  let str=false, strHi=0;
+  if (new Set(r).size===5) {
+    if (r[0]-r[4]===4) { str=true; strHi=r[0]; }
+    else if (r[0]===14&&r[1]===5&&r[2]===4&&r[3]===3&&r[4]===2) { str=true; strHi=5; }
   }
-
-  const cm = {};
-  for (const x of r) cm[x] = (cm[x] || 0) + 1;
-  const grp = Object.entries(cm).sort((a, b) => b[1]-a[1] || b[0]-a[0]);
-  const cnt = grp.map(g => g[1]);
-  const grs = grp.map(g => +g[0]);
-
-  if (flush && str) return { rank: strHi===14 ? 9 : 8, tb:[strHi] };
-  if (cnt[0]===4)              return { rank:7, tb:[grs[0],grs[1]] };
-  if (cnt[0]===3&&cnt[1]===2)  return { rank:6, tb:[grs[0],grs[1]] };
-  if (flush)                   return { rank:5, tb:r };
-  if (str)                     return { rank:4, tb:[strHi] };
-  if (cnt[0]===3)              return { rank:3, tb:grs };
-  if (cnt[0]===2&&cnt[1]===2)  return { rank:2, tb:grs };
-  if (cnt[0]===2)              return { rank:1, tb:grs };
-  return                              { rank:0, tb:r };
+  const cm={};
+  for (const x of r) cm[x]=(cm[x]||0)+1;
+  const grp=Object.entries(cm).sort((a,b)=>b[1]-a[1]||b[0]-a[0]);
+  const cnt=grp.map(g=>g[1]), grs=grp.map(g=>+g[0]);
+  if (flush&&str) return {rank:strHi===14?9:8,tb:[strHi]};
+  if (cnt[0]===4) return {rank:7,tb:[grs[0],grs[1]]};
+  if (cnt[0]===3&&cnt[1]===2) return {rank:6,tb:[grs[0],grs[1]]};
+  if (flush) return {rank:5,tb:r};
+  if (str)   return {rank:4,tb:[strHi]};
+  if (cnt[0]===3) return {rank:3,tb:grs};
+  if (cnt[0]===2&&cnt[1]===2) return {rank:2,tb:grs};
+  if (cnt[0]===2) return {rank:1,tb:grs};
+  return {rank:0,tb:r};
 }
-
 function bestHand(cards) {
-  if (cards.length < 5) return null;
-  return combos(cards, 5).reduce((best, c) => {
-    const h = evalFive(c);
-    return !best || cmpH(h, best) > 0 ? h : best;
-  }, null);
+  if (cards.length<5) return null;
+  return combos(cards,5).reduce((best,c)=>{
+    const h=evalFive(c);
+    return !best||cmpH(h,best)>0?h:best;
+  },null);
 }
-
-function cmpH(a, b) {
-  if (a.rank !== b.rank) return a.rank - b.rank;
-  for (let i = 0; i < Math.min(a.tb.length, b.tb.length); i++)
-    if (a.tb[i] !== b.tb[i]) return a.tb[i] - b.tb[i];
+function cmpH(a,b) {
+  if (a.rank!==b.rank) return a.rank-b.rank;
+  for (let i=0;i<Math.min(a.tb.length,b.tb.length);i++)
+    if (a.tb[i]!==b.tb[i]) return a.tb[i]-b.tb[i];
   return 0;
 }
 
+/* ─── 몬테카를로 ─── */
 function monteCarlo(hole, comm, n) {
-  const known = [...hole, ...comm];
-  const pool  = createDeck().filter(c => !known.some(k => k.suit===c.suit && k.rank===c.rank));
-  const fill  = 5 - comm.length;
-  let win = 0, tie = 0;
-
-  for (let i = 0; i < n; i++) {
+  const known=[...hole,...comm];
+  const pool=createDeck().filter(c=>!known.some(k=>k.suit===c.suit&&k.rank===c.rank));
+  const fill=5-comm.length;
+  let win=0,tie=0;
+  for (let i=0;i<n;i++) {
     shuffle(pool);
-    const opp  = pool.slice(0, 2);
-    const more = pool.slice(2, 2 + fill);
-    const full = [...comm, ...more];
-    const me   = bestHand([...hole, ...full]);
-    const op   = bestHand([...opp,  ...full]);
-    const c    = cmpH(me, op);
-    if (c > 0) win++; else if (c === 0) tie++;
+    const opp=pool.slice(0,2), more=pool.slice(2,2+fill);
+    const full=[...comm,...more];
+    const me=bestHand([...hole,...full]), op=bestHand([...opp,...full]);
+    const c=cmpH(me,op);
+    if (c>0) win++; else if (c===0) tie++;
   }
-  return {
-    winRate: Math.round((win + tie * 0.5) / n * 100),
-    tieRate: Math.round(tie / n * 100)
-  };
+  return {winRate:Math.round((win+tie*0.5)/n*100), tieRate:Math.round(tie/n*100)};
 }
 
+/* ─── 아웃츠 ─── */
 function analyzeOuts(hole, comm) {
-  if (comm.length < 3 || comm.length >= 5) return null;
-
-  const all    = [...hole, ...comm];
-  const unseen = createDeck().filter(c => !all.some(k => k.suit===c.suit && k.rank===c.rank));
-  const cur    = bestHand(all);
-  if (!cur) return null;
-
-  const byRank = {};
-  let total = 0;
-
+  if (comm.length<3||comm.length>=5) return null;
+  const all=[...hole,...comm];
+  const unseen=createDeck().filter(c=>!all.some(k=>k.suit===c.suit&&k.rank===c.rank));
+  const cur=bestHand(all); if (!cur) return null;
+  const byRank={}; let total=0;
   for (const c of unseen) {
-    const next = bestHand([...all, c]);
-    if (next && cmpH(next, cur) > 0) {
-      byRank[next.rank] = (byRank[next.rank] || 0) + 1;
-      total++;
-    }
+    const next=bestHand([...all,c]);
+    if (next&&cmpH(next,cur)>0) { byRank[next.rank]=(byRank[next.rank]||0)+1; total++; }
   }
-
-  const draws = Object.entries(byRank)
-    .sort((a, b) => +b[0] - +a[0])
-    .map(([rankStr, count]) => ({ handName: HAND_NAMES[+rankStr], count }));
-
-  return {
-    total,
-    unseen: unseen.length,
-    hitProb: Math.round(total / unseen.length * 100),
-    draws
-  };
+  const draws=Object.entries(byRank).sort((a,b)=>+b[0]-+a[0]).map(([r,cnt])=>({handName:HAND_NAMES[+r],count:cnt}));
+  return {total, unseen:unseen.length, hitProb:Math.round(total/unseen.length*100), draws};
 }
 
-const gs = { phase:'IDLE', deck:[], hole:[], comm:[], winRate:0, tieRate:0 };
+/* ─── 게임 상태 ─── */
+const gs={phase:'IDLE',deck:[],hole:[],comm:[],winRate:0,tieRate:0};
 
 function startGame() {
-  gs.deck    = shuffle(createDeck());
-  gs.hole    = deal(gs.deck, 2);
-  gs.comm    = [];
-  gs.winRate = 0;
-  gs.tieRate = 0;
-  gs.phase   = 'PREFLOP';
-  renderAll();
-  calcAsync(1500);
+  gs.deck=shuffle(createDeck()); gs.hole=deal(gs.deck,2);
+  gs.comm=[]; gs.winRate=0; gs.tieRate=0; gs.phase='PREFLOP';
+  renderAll(); calcAsync(1500);
 }
-
 function doCall() {
-  const t = {
-    PREFLOP: () => { gs.comm = deal(gs.deck, 3); gs.phase = 'FLOP'; },
-    FLOP:    () => { gs.comm.push(...deal(gs.deck, 1)); gs.phase = 'TURN'; },
-    TURN:    () => { gs.comm.push(...deal(gs.deck, 1)); gs.phase = 'RIVER'; },
-    RIVER:   () => { gs.phase = 'DONE'; }
+  const t={
+    PREFLOP:()=>{gs.comm=deal(gs.deck,3);gs.phase='FLOP';},
+    FLOP:   ()=>{gs.comm.push(...deal(gs.deck,1));gs.phase='TURN';},
+    TURN:   ()=>{gs.comm.push(...deal(gs.deck,1));gs.phase='RIVER';},
+    RIVER:  ()=>{gs.phase='DONE';}
   };
   if (t[gs.phase]) t[gs.phase]();
   renderAll();
-  if (gs.phase !== 'DONE') calcAsync(1000);
+  if (gs.phase!=='DONE') calcAsync(1000);
 }
-
-function doFold() {
-  gs.phase = 'FOLD';
-  renderAll();
-}
+function doFold() { gs.phase='FOLD'; renderAll(); }
 
 function calcAsync(n) {
-  const pct  = document.getElementById('wr-pct');
-  const fill = document.getElementById('wr-fill');
-  pct.textContent  = '계산 중...';
-  pct.className    = 'wr-pct calc';
-  fill.style.width = '0%';
-  setTimeout(() => {
-    const r = monteCarlo(gs.hole, gs.comm, n);
-    gs.winRate = r.winRate;
-    gs.tieRate = r.tieRate;
-    renderWinRate();
-  }, 10);
+  const pct=document.getElementById('wr-pct'), fill=document.getElementById('wr-fill');
+  pct.textContent='계산 중...'; pct.className='wr-pct calc'; fill.style.width='0%';
+  setTimeout(()=>{ const r=monteCarlo(gs.hole,gs.comm,n); gs.winRate=r.winRate; gs.tieRate=r.tieRate; renderWinRate(); },10);
 }
 
+/* ─── 렌더 ─── */
 function makeCard(c) {
-  const el  = document.createElement('div');
-  const red = c.suit === '♥' || c.suit === '♦';
-  el.className = 'card ' + (red ? 'red' : 'black');
-  const v = c.value === 'T' ? '10' : c.value;
-  el.innerHTML =
-    `<div class="top">${v}${c.suit}</div>` +
-    `<div class="mid">${c.suit}</div>` +
-    `<div class="bot">${v}${c.suit}</div>`;
+  const el=document.createElement('div');
+  const red=c.suit==='♥'||c.suit==='♦';
+  el.className='card '+(red?'red':'black');
+  const v=c.value==='T'?'10':c.value;
+  el.innerHTML=`<div class="top">${v}${c.suit}</div><div class="mid">${c.suit}</div><div class="bot">${v}${c.suit}</div>`;
   return el;
 }
-
-function makeSlot() {
-  const el = document.createElement('div');
-  el.className = 'card-slot';
-  return el;
-}
+function makeSlot() { const el=document.createElement('div'); el.className='card-slot'; return el; }
 
 function renderStages() {
-  const bar = document.getElementById('stage-bar');
-  bar.innerHTML = '';
-  const idx = STAGE_IDX[gs.phase] ?? -1;
-  STAGES.forEach((s, i) => {
-    if (i > 0) {
-      const sep = document.createElement('span');
-      sep.className = 'stage-sep'; sep.textContent = '›';
-      bar.appendChild(sep);
-    }
-    const dot = document.createElement('div');
-    dot.className = 'stage-dot';
-    const lbl = document.createElement('span');
-    lbl.className = 'stage-lbl'; lbl.textContent = s.lbl;
-    if (i === idx)    { dot.classList.add('active'); lbl.classList.add('active'); }
-    else if (i < idx) { dot.classList.add('done');   lbl.classList.add('done'); }
-    bar.appendChild(dot);
-    bar.appendChild(lbl);
+  const bar=document.getElementById('stage-bar'); bar.innerHTML='';
+  const idx=STAGE_IDX[gs.phase]??-1;
+  STAGES.forEach((s,i)=>{
+    if (i>0) { const sep=document.createElement('span'); sep.className='stage-sep'; sep.textContent='›'; bar.appendChild(sep); }
+    const dot=document.createElement('div'); dot.className='stage-dot';
+    const lbl=document.createElement('span'); lbl.className='stage-lbl'; lbl.textContent=s.lbl;
+    if (i===idx){dot.classList.add('active');lbl.classList.add('active');}
+    else if (i<idx){dot.classList.add('done');lbl.classList.add('done');}
+    bar.appendChild(dot); bar.appendChild(lbl);
   });
 }
-
 function renderCommunity() {
-  const area = document.getElementById('community-cards');
-  area.innerHTML = '';
-  for (let i = 0; i < 5; i++)
-    area.appendChild(i < gs.comm.length ? makeCard(gs.comm[i]) : makeSlot());
+  const a=document.getElementById('community-cards'); a.innerHTML='';
+  for (let i=0;i<5;i++) a.appendChild(i<gs.comm.length?makeCard(gs.comm[i]):makeSlot());
 }
-
 function renderWinRate() {
-  const pct  = document.getElementById('wr-pct');
-  const fill = document.getElementById('wr-fill');
-  const sub  = document.getElementById('wr-sub');
-
-  if (gs.phase === 'IDLE' || gs.phase === 'FOLD') {
-    pct.textContent = '—'; pct.className = 'wr-pct';
-    fill.style.width = '0%'; sub.textContent = '';
-    return;
-  }
-  pct.textContent  = gs.winRate + '%';
-  pct.className    = 'wr-pct';
-  fill.style.width = gs.winRate + '%';
-  sub.textContent  = gs.tieRate > 0 ? `무승부 ${gs.tieRate}% 포함` : '랜덤 상대 1명 기준';
+  const pct=document.getElementById('wr-pct'),fill=document.getElementById('wr-fill'),sub=document.getElementById('wr-sub');
+  if (gs.phase==='IDLE'||gs.phase==='FOLD') { pct.textContent='—';pct.className='wr-pct';fill.style.width='0%';sub.textContent='';return; }
+  pct.textContent=gs.winRate+'%'; pct.className='wr-pct'; fill.style.width=gs.winRate+'%';
+  sub.textContent=gs.tieRate>0?`무승부 ${gs.tieRate}% 포함`:'랜덤 상대 1명 기준';
 }
-
 function renderOuts() {
-  const section = document.getElementById('outs-section');
-  const numEl   = document.getElementById('outs-num');
-  const probEl  = document.getElementById('outs-prob');
-  const listEl  = document.getElementById('outs-list');
-
-  if (gs.phase !== 'FLOP' && gs.phase !== 'TURN') {
-    section.style.display = 'none';
-    return;
-  }
-  section.style.display = 'block';
-
-  const res = analyzeOuts(gs.hole, gs.comm);
-  if (!res) { section.style.display = 'none'; return; }
-
-  numEl.textContent  = res.total;
-  probEl.textContent = res.hitProb + '%';
-
-  if (res.total === 0) {
-    listEl.innerHTML = '<span class="outs-none">현재 패가 최선 — 개선할 아웃츠 없음</span>';
-    return;
-  }
-
-  listEl.innerHTML = res.draws
-    .map(d => `<span class="out-tag">→ ${d.handName} <span class="oc">${d.count}장</span></span>`)
-    .join('');
+  const sec=document.getElementById('outs-section');
+  if (gs.phase!=='FLOP'&&gs.phase!=='TURN'){sec.style.display='none';return;}
+  sec.style.display='block';
+  const res=analyzeOuts(gs.hole,gs.comm); if(!res){sec.style.display='none';return;}
+  document.getElementById('outs-num').textContent=res.total;
+  document.getElementById('outs-prob').textContent=res.hitProb+'%';
+  const listEl=document.getElementById('outs-list');
+  if (res.total===0){listEl.innerHTML='<span class="outs-none">현재 패가 최선 — 아웃츠 없음</span>';return;}
+  listEl.innerHTML=res.draws.map(d=>`<span class="out-tag">→ ${d.handName} <span class="oc">${d.count}장</span></span>`).join('');
 }
-
 function renderPlayer() {
-  const area = document.getElementById('player-cards');
-  area.innerHTML = '';
+  const area=document.getElementById('player-cards'); area.innerHTML='';
   for (const c of gs.hole) area.appendChild(makeCard(c));
-
-  const hn  = document.getElementById('hand-name');
-  const all = [...gs.hole, ...gs.comm];
-
-  if (gs.hole.length === 0) { hn.textContent = ''; return; }
-
-  if (all.length >= 5) {
-    const b = bestHand(all);
-    hn.textContent = b ? HAND_NAMES[b.rank] : '';
-  } else {
-    const [a, b] = gs.hole;
-    if (a.rank === b.rank)    hn.textContent = '포켓 페어';
-    else if (a.suit===b.suit) hn.textContent = '수티드';
-    else                      hn.textContent = '오프수트';
-  }
+  const hn=document.getElementById('hand-name'), all=[...gs.hole,...gs.comm];
+  if (!gs.hole.length){hn.textContent='';return;}
+  if (all.length>=5){const b=bestHand(all);hn.textContent=b?HAND_NAMES[b.rank]:'';}
+  else{const[a,b]=gs.hole;if(a.rank===b.rank)hn.textContent='포켓 페어';else if(a.suit===b.suit)hn.textContent='수티드';else hn.textContent='오프수트';}
 }
-
 function renderButtons() {
-  const area = document.getElementById('action-area');
-  area.innerHTML = '';
-  const add = (cls, txt, fn) => {
-    const b = document.createElement('button');
-    b.className = 'btn ' + cls; b.textContent = txt; b.onclick = fn;
-    area.appendChild(b);
-  };
-
-  if (gs.phase === 'IDLE')       { add('btn-call','게임 시작', startGame); }
-  else if (gs.phase==='PREFLOP') { add('btn-call','콜 → 플랍 보기', doCall); add('btn-fold','폴드', doFold); }
-  else if (gs.phase==='FLOP')    { add('btn-next','턴 카드 보기', doCall);    add('btn-fold','폴드', doFold); }
-  else if (gs.phase==='TURN')    { add('btn-next','리버 카드 보기', doCall);  add('btn-fold','폴드', doFold); }
-  else if (gs.phase==='RIVER')   { add('btn-next','최종 패 확인', doCall); }
-  else                           { add('btn-new','새 게임', startGame); }
+  const area=document.getElementById('action-area'); area.innerHTML='';
+  const add=(cls,txt,fn)=>{const b=document.createElement('button');b.className='gbtn '+cls;b.textContent=txt;b.onclick=fn;area.appendChild(b);};
+  if (gs.phase==='IDLE')       add('gbtn-call','게임 시작',startGame);
+  else if (gs.phase==='PREFLOP'){add('gbtn-call','콜 → 플랍 보기',doCall);add('gbtn-fold','폴드',doFold);}
+  else if (gs.phase==='FLOP')  {add('gbtn-next','턴 카드 보기',doCall);add('gbtn-fold','폴드',doFold);}
+  else if (gs.phase==='TURN')  {add('gbtn-next','리버 카드 보기',doCall);add('gbtn-fold','폴드',doFold);}
+  else if (gs.phase==='RIVER')  add('gbtn-next','최종 패 확인',doCall);
+  else                          add('gbtn-new','새 게임',startGame);
 }
-
 function renderResult() {
-  const el = document.getElementById('result-area');
-
-  if (gs.phase==='IDLE' || gs.phase==='PREFLOP') {
-    el.className = 'result-area'; el.innerHTML = ''; return;
-  }
-  if (gs.phase==='FOLD') {
-    el.className = 'result-area result-fold vis';
-    el.textContent = '폴드했습니다.'; return;
-  }
-  if (gs.phase==='DONE') {
-    const b = bestHand([...gs.hole, ...gs.comm]);
-    el.className = 'result-area result-done vis';
-    el.innerHTML = b
-      ? `최종 패: <span style="font-size:20px">${HAND_NAMES[b.rank]}</span>`
-      : '결과를 확인하세요.';
+  const el=document.getElementById('result-area');
+  if (gs.phase==='IDLE'||gs.phase==='PREFLOP'){el.className='result-box';el.innerHTML='';return;}
+  if (gs.phase==='FOLD'){el.className='result-box res-fold vis';el.textContent='폴드했습니다.';return;}
+  if (gs.phase==='DONE'){
+    const b=bestHand([...gs.hole,...gs.comm]);
+    el.className='result-box res-done vis';
+    el.innerHTML=b?`최종 패: <span style="font-size:20px">${HAND_NAMES[b.rank]}</span>`:'결과를 확인하세요.';
     return;
   }
-  const msgs = { FLOP:'플랍 오픈!', TURN:'턴 오픈!', RIVER:'리버 오픈! 최종 패를 확인하세요.' };
-  el.className = 'result-area result-info vis';
-  el.textContent = msgs[gs.phase] || '';
+  const msgs={FLOP:'플랍 오픈!',TURN:'턴 오픈!',RIVER:'리버 오픈! 최종 패를 확인하세요.'};
+  el.className='result-box res-info vis'; el.textContent=msgs[gs.phase]||'';
 }
-
-function renderAll() {
-  renderStages();
-  renderCommunity();
-  renderWinRate();
-  renderOuts();
-  renderPlayer();
-  renderButtons();
-  renderResult();
-}
+function renderAll(){renderStages();renderCommunity();renderWinRate();renderOuts();renderPlayer();renderButtons();renderResult();}
 
 renderAll();
 </script>
