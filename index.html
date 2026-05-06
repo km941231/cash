@@ -373,7 +373,7 @@
     ═══════════════════════════════════ */
     .rank-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 14px;
     }
     .rank-card {
@@ -381,20 +381,27 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 16px 18px;
-      display: flex; align-items: flex-start; gap: 14px;
-      transition: border-color 0.2s;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .rank-card:hover { border-color: var(--accent); }
+    .rank-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(74,222,128,0.08); }
+    .rank-card[data-tier="gold"]   { border-color: rgba(250,204,21,0.45); }
+    .rank-card[data-tier="silver"] { border-color: rgba(148,163,184,0.45); }
+    .rank-card[data-tier="bronze"] { border-color: rgba(251,146,60,0.45); }
+    .rank-card-top { display: flex; align-items: center; gap: 10px; }
     .rank-num {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       background: var(--bg-card);
-      color: var(--accent); font-size: 13px; font-weight: 800;
+      color: var(--accent); font-size: 12px; font-weight: 800;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      flex-shrink: 0; transition: background 0.2s, color 0.2s;
     }
-    .rank-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-    .rank-info p  { font-size: 13px; color: var(--text-2); line-height: 1.5; }
-    .rank-ex { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+    .rank-card[data-tier="gold"]   .rank-num { background: rgba(250,204,21,0.15); color: #facc15; }
+    .rank-card[data-tier="silver"] .rank-num { background: rgba(148,163,184,0.15); color: #94a3b8; }
+    .rank-card[data-tier="bronze"] .rank-num { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .rank-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+    .rank-cards-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .rank-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
 
     /* ═══════════════════════════════════
        전략 카드
@@ -642,18 +649,7 @@
       <p>강한 패부터 약한 패 순서로 정리한 10가지 핸드 조합입니다.</p>
       <div class="divider"></div>
     </div>
-    <div class="rank-grid">
-      <div class="rank-card"><div class="rank-num">1</div><div class="rank-info"><h4>로얄 플러시</h4><p>같은 무늬의 A·K·Q·J·10 조합. 포커에서 가장 강한 패.</p><div class="rank-ex">A♠ K♠ Q♠ J♠ 10♠</div></div></div>
-      <div class="rank-card"><div class="rank-num">2</div><div class="rank-info"><h4>스트레이트 플러시</h4><p>같은 무늬의 연속된 5장. 로얄 플러시를 제외한 최강 패.</p><div class="rank-ex">9♥ 8♥ 7♥ 6♥ 5♥</div></div></div>
-      <div class="rank-card"><div class="rank-num">3</div><div class="rank-info"><h4>포카드 (Four of a Kind)</h4><p>같은 숫자 4장. 매우 희귀하고 강력한 패.</p><div class="rank-ex">K♠ K♥ K♦ K♣ 3♠</div></div></div>
-      <div class="rank-card"><div class="rank-num">4</div><div class="rank-info"><h4>풀하우스</h4><p>트리플 1개 + 페어 1개 조합. 안정적인 강패.</p><div class="rank-ex">Q♠ Q♥ Q♦ 7♠ 7♥</div></div></div>
-      <div class="rank-card"><div class="rank-num">5</div><div class="rank-info"><h4>플러시 (Flush)</h4><p>같은 무늬 5장. 연속될 필요는 없음.</p><div class="rank-ex">A♣ J♣ 8♣ 5♣ 2♣</div></div></div>
-      <div class="rank-card"><div class="rank-num">6</div><div class="rank-info"><h4>스트레이트</h4><p>무늬 상관없이 연속된 숫자 5장.</p><div class="rank-ex">9♠ 8♥ 7♦ 6♣ 5♠</div></div></div>
-      <div class="rank-card"><div class="rank-num">7</div><div class="rank-info"><h4>트리플 (Three of a Kind)</h4><p>같은 숫자 3장. 원페어보다 강하고 흔한 편.</p><div class="rank-ex">J♠ J♥ J♦ A♣ 4♠</div></div></div>
-      <div class="rank-card"><div class="rank-num">8</div><div class="rank-info"><h4>투페어 (Two Pair)</h4><p>페어 2개 조합. 초보자가 자주 완성하는 패.</p><div class="rank-ex">10♠ 10♥ 6♦ 6♣ K♠</div></div></div>
-      <div class="rank-card"><div class="rank-num">9</div><div class="rank-info"><h4>원페어 (One Pair)</h4><p>같은 숫자 2장. 가장 자주 나오는 패.</p><div class="rank-ex">A♠ A♥ K♦ 9♣ 3♠</div></div></div>
-      <div class="rank-card"><div class="rank-num">10</div><div class="rank-info"><h4>하이카드 (High Card)</h4><p>어떤 조합도 없을 때 가장 높은 카드로 비교.</p><div class="rank-ex">A♠ J♦ 9♣ 6♥ 2♠</div></div></div>
-    </div>
+    <div class="rank-grid" id="rank-grid"></div>
   </div>
 </section>
 
@@ -900,6 +896,30 @@ function toggleFaq(btn) {
   if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
 }
 
+/* ─── 패 랭킹 데이터 ─── */
+const RANK_DATA = [
+  {num:1,  tier:'gold',   name:'로얄 플러시',    desc:'같은 무늬의 A·K·Q·J·10. 포커 최강 패.',
+   cards:[{value:'A',suit:'♠'},{value:'K',suit:'♠'},{value:'Q',suit:'♠'},{value:'J',suit:'♠'},{value:'T',suit:'♠'}]},
+  {num:2,  tier:'silver', name:'스트레이트 플러시', desc:'같은 무늬의 연속된 5장. 로얄 플러시 제외 최강.',
+   cards:[{value:'9',suit:'♥'},{value:'8',suit:'♥'},{value:'7',suit:'♥'},{value:'6',suit:'♥'},{value:'5',suit:'♥'}]},
+  {num:3,  tier:'bronze', name:'포카드',          desc:'같은 숫자 4장. 매우 희귀하고 강력한 패.',
+   cards:[{value:'K',suit:'♠'},{value:'K',suit:'♥'},{value:'K',suit:'♦'},{value:'K',suit:'♣'},{value:'3',suit:'♠'}]},
+  {num:4,  tier:'',       name:'풀하우스',         desc:'트리플 1개 + 페어 1개. 안정적인 강패.',
+   cards:[{value:'Q',suit:'♠'},{value:'Q',suit:'♥'},{value:'Q',suit:'♦'},{value:'7',suit:'♠'},{value:'7',suit:'♥'}]},
+  {num:5,  tier:'',       name:'플러시',           desc:'같은 무늬 5장. 연속될 필요 없음.',
+   cards:[{value:'A',suit:'♣'},{value:'J',suit:'♣'},{value:'8',suit:'♣'},{value:'5',suit:'♣'},{value:'2',suit:'♣'}]},
+  {num:6,  tier:'',       name:'스트레이트',        desc:'연속된 숫자 5장. 무늬 무관.',
+   cards:[{value:'9',suit:'♠'},{value:'8',suit:'♥'},{value:'7',suit:'♦'},{value:'6',suit:'♣'},{value:'5',suit:'♠'}]},
+  {num:7,  tier:'',       name:'트리플',           desc:'같은 숫자 3장.',
+   cards:[{value:'J',suit:'♠'},{value:'J',suit:'♥'},{value:'J',suit:'♦'},{value:'A',suit:'♣'},{value:'4',suit:'♠'}]},
+  {num:8,  tier:'',       name:'투페어',           desc:'페어 2개 조합. 자주 완성되는 패.',
+   cards:[{value:'T',suit:'♠'},{value:'T',suit:'♥'},{value:'6',suit:'♦'},{value:'6',suit:'♣'},{value:'K',suit:'♠'}]},
+  {num:9,  tier:'',       name:'원페어',           desc:'같은 숫자 2장. 가장 자주 나오는 패.',
+   cards:[{value:'A',suit:'♠'},{value:'A',suit:'♥'},{value:'K',suit:'♦'},{value:'9',suit:'♣'},{value:'3',suit:'♠'}]},
+  {num:10, tier:'',       name:'하이카드',          desc:'아무 조합 없을 때 가장 높은 카드로 비교.',
+   cards:[{value:'A',suit:'♠'},{value:'J',suit:'♦'},{value:'9',suit:'♣'},{value:'6',suit:'♥'},{value:'2',suit:'♠'}]},
+];
+
 /* ─── 상수 ─── */
 const SUITS  = ['♠','♥','♦','♣'];
 const VALUES = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
@@ -1135,6 +1155,30 @@ function renderResult() {
 function renderAll(){renderStages();renderCommunity();renderWinRate();renderOuts();renderPlayer();renderButtons();renderResult();}
 
 renderAll();
+
+/* ─── 패 랭킹 렌더 ─── */
+function initRankings() {
+  const grid=document.getElementById('rank-grid');
+  for (const r of RANK_DATA) {
+    const card=document.createElement('div');
+    card.className='rank-card';
+    if (r.tier) card.dataset.tier=r.tier;
+
+    const top=document.createElement('div'); top.className='rank-card-top';
+    const num=document.createElement('div'); num.className='rank-num'; num.textContent=r.num;
+    const name=document.createElement('div'); name.className='rank-name'; name.textContent=r.name;
+    top.appendChild(num); top.appendChild(name);
+
+    const row=document.createElement('div'); row.className='rank-cards-row';
+    for (const c of r.cards) row.appendChild(makeMiniCard(c));
+
+    const desc=document.createElement('p'); desc.className='rank-desc'; desc.textContent=r.desc;
+
+    card.appendChild(top); card.appendChild(row); card.appendChild(desc);
+    grid.appendChild(card);
+  }
+}
+initRankings();
 </script>
 </body>
 </html>
