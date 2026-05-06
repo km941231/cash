@@ -291,20 +291,48 @@
       background: var(--bg-deep); border-radius: var(--radius-md);
       padding: 12px 14px; border: 1px solid var(--border); margin-bottom: 14px;
     }
-    .outs-hd { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .outs-hd {
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none;
+    }
+    .outs-hd-left { display: flex; align-items: center; gap: 8px; }
     .outs-ttl { color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
-    .outs-sum { display: flex; align-items: baseline; gap: 6px; }
+    .outs-sum { display: flex; align-items: baseline; gap: 5px; }
     .outs-num { color: var(--text-1); font-size: 22px; font-weight: 800; }
     .outs-plbl { color: var(--text-2); font-size: 12px; }
     .outs-prob { color: var(--warn); font-weight: 700; font-size: 13px; }
-    .outs-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .out-tag {
-      background: rgba(30,77,140,0.4); border: 1px solid var(--border);
-      color: var(--info); border-radius: 6px; padding: 3px 8px;
-      font-size: 12px; font-weight: 500;
+    .outs-toggle {
+      color: var(--text-3); font-size: 11px; width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; background: var(--bg-card);
+      transition: background 0.15s, transform 0.2s; flex-shrink: 0;
     }
-    .out-tag .oc { color: var(--accent); font-weight: 700; }
-    .outs-none { color: var(--text-3); font-size: 13px; font-style: italic; }
+    .outs-toggle.open { transform: rotate(180deg); background: var(--border); }
+    .outs-body { overflow: hidden; transition: max-height 0.3s ease; max-height: 0; }
+    .outs-body.open { max-height: 600px; }
+    .outs-body-inner { padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .outs-group { display: flex; flex-direction: column; gap: 6px; }
+    .outs-group-hd {
+      font-size: 11px; color: var(--text-3); text-transform: uppercase;
+      letter-spacing: 1px; display: flex; align-items: center; gap: 6px;
+    }
+    .outs-group-hd .og-name { color: var(--info); font-weight: 700; }
+    .outs-group-hd .og-cnt { color: var(--accent); font-weight: 700; }
+    .outs-cards { display: flex; flex-wrap: wrap; gap: 5px; }
+    .mini-card {
+      width: 32px; height: 46px;
+      background: #ffffff; border-radius: 5px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.22), 0 3px 10px rgba(0,0,0,0.12);
+      border: 1px solid rgba(0,0,0,0.08);
+      flex-shrink: 0; gap: 1px;
+    }
+    .mini-card .mv { font-size: 12px; font-weight: 900; line-height: 1; }
+    .mini-card .ms { font-size: 11px; line-height: 1; }
+    .mini-card.red { color: #e11d48; }
+    .mini-card.black { color: #111827; }
+    .outs-none { color: var(--text-3); font-size: 13px; font-style: italic; padding-top: 10px; }
 
     /* 내 패 */
     .player-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 14px; }
@@ -581,14 +609,19 @@
         <div id="wr-sub" class="wr-sub"></div>
       </div>
       <div id="outs-section" class="outs-box" style="display:none">
-        <div class="outs-hd">
-          <span class="outs-ttl">아웃츠</span>
-          <div class="outs-sum">
-            <span id="outs-num" class="outs-num">0</span>
-            <span class="outs-plbl">장 &nbsp;|&nbsp; 힛 확률 <span id="outs-prob" class="outs-prob">0%</span></span>
+        <div class="outs-hd" onclick="toggleOuts()">
+          <div class="outs-hd-left">
+            <span class="outs-ttl">아웃츠</span>
+            <div class="outs-sum">
+              <span id="outs-num" class="outs-num">0</span>
+              <span class="outs-plbl">장 &nbsp;|&nbsp; <span id="outs-prob" class="outs-prob">0%</span></span>
+            </div>
           </div>
+          <div id="outs-toggle" class="outs-toggle">▼</div>
         </div>
-        <div id="outs-list" class="outs-list"></div>
+        <div id="outs-body" class="outs-body">
+          <div id="outs-inner" class="outs-body-inner"></div>
+        </div>
       </div>
       <div class="player-box">
         <div class="box-lbl">내 패</div>
@@ -958,10 +991,23 @@ function analyzeOuts(hole, comm) {
   const byRank={}; let total=0;
   for (const c of unseen) {
     const next=bestHand([...all,c]);
-    if (next&&cmpH(next,cur)>0) { byRank[next.rank]=(byRank[next.rank]||0)+1; total++; }
+    if (next&&cmpH(next,cur)>0) {
+      if (!byRank[next.rank]) byRank[next.rank]={count:0,cards:[]};
+      byRank[next.rank].count++; byRank[next.rank].cards.push(c); total++;
+    }
   }
-  const draws=Object.entries(byRank).sort((a,b)=>+b[0]-+a[0]).map(([r,cnt])=>({handName:HAND_NAMES[+r],count:cnt}));
+  const draws=Object.entries(byRank).sort((a,b)=>+b[0]-+a[0])
+    .map(([r,d])=>({handName:HAND_NAMES[+r],count:d.count,cards:d.cards}));
   return {total, unseen:unseen.length, hitProb:Math.round(total/unseen.length*100), draws};
+}
+
+let outsOpen=false;
+function toggleOuts() {
+  outsOpen=!outsOpen;
+  const body=document.getElementById('outs-body');
+  const tog=document.getElementById('outs-toggle');
+  body.classList.toggle('open',outsOpen);
+  tog.classList.toggle('open',outsOpen);
 }
 
 /* ─── 게임 상태 ─── */
@@ -970,6 +1016,7 @@ const gs={phase:'IDLE',deck:[],hole:[],comm:[],winRate:0,tieRate:0};
 function startGame() {
   gs.deck=shuffle(createDeck()); gs.hole=deal(gs.deck,2);
   gs.comm=[]; gs.winRate=0; gs.tieRate=0; gs.phase='PREFLOP';
+  outsOpen=false;
   renderAll(); calcAsync(1500);
 }
 function doCall() {
@@ -1022,6 +1069,14 @@ function renderWinRate() {
   pct.textContent=gs.winRate+'%'; pct.className='wr-pct'; fill.style.width=gs.winRate+'%';
   sub.textContent=gs.tieRate>0?`무승부 ${gs.tieRate}% 포함`:'랜덤 상대 1명 기준';
 }
+function makeMiniCard(c) {
+  const el=document.createElement('div');
+  const red=c.suit==='♥'||c.suit==='♦';
+  el.className='mini-card '+(red?'red':'black');
+  const v=c.value==='T'?'10':c.value;
+  el.innerHTML=`<div class="mv">${v}</div><div class="ms">${c.suit}</div>`;
+  return el;
+}
 function renderOuts() {
   const sec=document.getElementById('outs-section');
   if (gs.phase!=='FLOP'&&gs.phase!=='TURN'){sec.style.display='none';return;}
@@ -1029,9 +1084,22 @@ function renderOuts() {
   const res=analyzeOuts(gs.hole,gs.comm); if(!res){sec.style.display='none';return;}
   document.getElementById('outs-num').textContent=res.total;
   document.getElementById('outs-prob').textContent=res.hitProb+'%';
-  const listEl=document.getElementById('outs-list');
-  if (res.total===0){listEl.innerHTML='<span class="outs-none">현재 패가 최선 — 아웃츠 없음</span>';return;}
-  listEl.innerHTML=res.draws.map(d=>`<span class="out-tag">→ ${d.handName} <span class="oc">${d.count}장</span></span>`).join('');
+  const inner=document.getElementById('outs-inner'); inner.innerHTML='';
+  const body=document.getElementById('outs-body');
+  const tog=document.getElementById('outs-toggle');
+  body.classList.toggle('open',outsOpen);
+  tog.classList.toggle('open',outsOpen);
+  if (res.total===0) {
+    const n=document.createElement('div'); n.className='outs-none'; n.textContent='현재 패가 최선 — 아웃츠 없음'; inner.appendChild(n); return;
+  }
+  for (const d of res.draws) {
+    const grp=document.createElement('div'); grp.className='outs-group';
+    const hd=document.createElement('div'); hd.className='outs-group-hd';
+    hd.innerHTML=`<span class="og-name">${d.handName}</span><span class="og-cnt">${d.count}장</span>`;
+    const row=document.createElement('div'); row.className='outs-cards';
+    for (const c of d.cards) row.appendChild(makeMiniCard(c));
+    grp.appendChild(hd); grp.appendChild(row); inner.appendChild(grp);
+  }
 }
 function renderPlayer() {
   const area=document.getElementById('player-cards'); area.innerHTML='';
