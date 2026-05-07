@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8112449256805412" crossorigin="anonymous"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="홀덤 포커 전략 게시판. 포지션 레인지, 팟 오즈, 아웃츠 계산, 핸드 분석 등 포커 실력 향상을 위한 전략 글 모음.">
+  <meta name="keywords" content="홀덤 전략, 포커 전략, 오픈 레인지, 팟 오즈, 아웃츠 계산, 3벳 전략, 스타팅 핸드, 뱅크롤">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="포커 전략 게시판 | 홀덤 분석기">
+  <meta property="og:description" content="포커 전략, 핸드 분석, 확률 계산 노하우를 모은 전략 게시판입니다.">
+  <meta property="og:type" content="website">
+  <title>포커 전략 게시판 | 홀덤 분석기</title>
+  <style>
+    :root {
+      --bg-base:    #0b0810;
+      --bg-surface: #130e1a;
+      --bg-deep:    #0e0a14;
+      --bg-card:    #1c1228;
+      --gold:       #d4af37;
+      --gold-l:     #f0d060;
+      --gold-d:     #8a6f20;
+      --accent:     #d4af37;
+      --accent2:    #b8960e;
+      --danger:     #e74c3c;
+      --warn:       #f39c12;
+      --info:       #5ab4f0;
+      --text-1:     #f0e6d0;
+      --text-2:     #a09080;
+      --text-3:     #504038;
+      --border:     #2a1e14;
+      --border-g:   rgba(212,175,55,0.22);
+      --nav-bg:     rgba(11,8,16,0.96);
+      --shadow-lg:  0 24px 64px rgba(0,0,0,0.75);
+      --radius-lg:  20px;
+      --radius-md:  12px;
+      --radius-sm:  8px;
+    }
+    [data-theme="light"] {
+      --bg-base:    #f7f2ea;
+      --bg-surface: #ffffff;
+      --bg-deep:    #ede5d8;
+      --bg-card:    #e4d9c8;
+      --gold:       #9a7a10;
+      --gold-l:     #c4a020;
+      --gold-d:     #6a5408;
+      --accent:     #9a7a10;
+      --accent2:    #7a6010;
+      --danger:     #c03020;
+      --warn:       #a06000;
+      --info:       #1a60b0;
+      --text-1:     #1a1008;
+      --text-2:     #503828;
+      --text-3:     #9a8878;
+      --border:     #d0c0a8;
+      --border-g:   rgba(154,122,16,0.3);
+      --nav-bg:     rgba(247,242,234,0.97);
+      --shadow-lg:  0 24px 64px rgba(0,0,0,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-base); color: var(--text-1);
+      line-height: 1.7; transition: background 0.3s, color 0.3s;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── 네비게이션 ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--nav-bg); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-g); padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 62px; gap: 16px;
+    }
+    .nav-logo { font-size: 19px; font-weight: 900; color: var(--text-1); white-space: nowrap; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-wrap: wrap; }
+    .nav-links a {
+      color: var(--text-2); font-size: 13.5px; font-weight: 500;
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--gold); background: rgba(212,175,55,0.08); text-decoration: none; }
+    .theme-btn {
+      background: transparent; border: 1px solid var(--border-g);
+      color: var(--text-2); border-radius: 999px;
+      padding: 6px 16px; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .theme-btn:hover { background: var(--gold); color: #0b0810; border-color: var(--gold); }
+
+    /* ── 게시판 히어로 ── */
+    .board-hero {
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(100,20,20,0.3) 0%, transparent 70%),
+                  var(--bg-surface);
+      border-bottom: 1px solid var(--border-g);
+      padding: 52px 24px 44px; text-align: center;
+    }
+    .board-hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border-g); background: rgba(212,175,55,0.08);
+      color: var(--gold); border-radius: 999px;
+      padding: 5px 16px; font-size: 11px; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .board-hero h1 {
+      font-size: clamp(24px, 4vw, 38px); font-weight: 900;
+      margin-bottom: 10px; letter-spacing: -0.5px;
+    }
+    .board-hero h1 .g {
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .board-hero p { color: var(--text-2); font-size: 15px; max-width: 480px; margin: 0 auto; }
+
+    /* ── 카테고리 탭 ── */
+    .cat-section { padding: 28px 24px 0; max-width: 900px; margin: 0 auto; width: 100%; }
+    .cat-tabs {
+      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab {
+      flex-shrink: 0; padding: 8px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      border: 1px solid var(--border-g); background: transparent;
+      color: var(--text-2); transition: all 0.15s;
+    }
+    .cat-tab:hover { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,0.07); }
+    .cat-tab.active { background: linear-gradient(135deg, var(--gold), var(--gold-l)); color: #0b0810; border-color: transparent; }
+
+    /* ── 게시글 목록 ── */
+    .board-section { flex: 1; padding: 24px 24px 60px; }
+    .board-list { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+    /* ── 게시글 카드 ── */
+    .post-card {
+      background: var(--bg-surface); border: 1px solid var(--border-g);
+      border-radius: var(--radius-md); overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .post-card:hover { border-color: rgba(212,175,55,0.45); box-shadow: 0 4px 24px rgba(212,175,55,0.07); }
+    .post-head {
+      padding: 18px 20px; cursor: pointer;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .post-meta {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: var(--text-3);
+    }
+    .post-num { font-weight: 800; color: var(--gold-d); }
+    .post-cat {
+      padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+    .post-cat.전략    { background: rgba(212,175,55,0.15); color: var(--gold); }
+    .post-cat.핸드분석 { background: rgba(231,76,60,0.15);  color: #f08070; }
+    .post-cat.확률계산 { background: rgba(90,180,240,0.15); color: var(--info); }
+    .post-date { margin-left: auto; }
+    .post-title {
+      font-size: 16px; font-weight: 800; color: var(--text-1);
+      line-height: 1.4;
+    }
+    .post-preview { font-size: 13.5px; color: var(--text-2); line-height: 1.65; }
+    .post-footer {
+      padding: 0 20px 14px;
+      display: flex; align-items: center; justify-content: flex-end;
+    }
+    .post-toggle {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 700; color: var(--gold-d);
+      cursor: pointer; background: none; border: none;
+      transition: color 0.15s;
+    }
+    .post-toggle:hover { color: var(--gold); }
+    .post-toggle .arr { transition: transform 0.25s; display: inline-block; }
+    .post-toggle.open .arr { transform: rotate(180deg); }
+    .post-toggle.open { color: var(--gold); }
+
+    /* ── 본문 ── */
+    .post-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s ease;
+      border-top: 0 solid var(--border-g);
+    }
+    .post-body.open {
+      max-height: 2000px;
+      border-top-width: 1px;
+    }
+    .post-body-inner {
+      padding: 22px 24px 26px;
+    }
+    .post-body-inner h4 {
+      font-size: 15px; font-weight: 800; color: var(--gold);
+      margin: 20px 0 8px;
+    }
+    .post-body-inner h4:first-child { margin-top: 0; }
+    .post-body-inner p { font-size: 14px; color: var(--text-2); line-height: 1.8; margin-bottom: 10px; }
+    .post-body-inner ul, .post-body-inner ol {
+      font-size: 14px; color: var(--text-2); padding-left: 20px; line-height: 2; margin-bottom: 10px;
+    }
+    .post-body-inner .tip {
+      background: rgba(212,175,55,0.07); border-left: 2px solid var(--gold);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 10px 14px; margin: 14px 0;
+      font-size: 13.5px; color: var(--text-2);
+    }
+    .post-body-inner .tip strong { color: var(--gold); }
+    .post-body-inner table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      margin: 14px 0;
+    }
+    .post-body-inner th {
+      background: var(--bg-card); color: var(--gold);
+      padding: 8px 12px; text-align: left; font-weight: 700;
+      border: 1px solid var(--border-g);
+    }
+    .post-body-inner td {
+      padding: 7px 12px; border: 1px solid var(--border);
+      color: var(--text-2);
+    }
+    .post-body-inner tr:hover td { background: rgba(212,175,55,0.04); }
+    .post-tool-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 16px; padding: 10px 18px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      color: #0b0810; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 800; text-decoration: none;
+      transition: box-shadow 0.2s;
+    }
+    .post-tool-link:hover { box-shadow: 0 4px 20px rgba(212,175,55,0.4); text-decoration: none; color: #0b0810; }
+
+    /* ── 빈 상태 ── */
+    .board-empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-3); font-size: 15px;
+    }
+
+    /* ── 푸터 ── */
+    .footer {
+      background: var(--bg-surface); border-top: 1px solid var(--border-g);
+      padding: 32px 24px 24px;
+    }
+    .footer-bottom {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-3); flex-wrap: wrap; gap: 8px;
+    }
+    .footer-bottom a { color: var(--text-3); }
+    .footer-bottom a:hover { color: var(--gold); }
+
+    @media (max-width: 768px) { .nav-links { display: none; } }
+    @media (max-width: 480px) {
+      .board-section { padding: 20px 12px 48px; }
+      .post-head { padding: 16px; }
+      .post-body-inner { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">홀덤 <span>분석기</span></a>
+    <ul class="nav-links">
+      <li><a href="game.html">핸드 연습</a></li>
+      <li><a href="odds.html">확률 계산기</a></li>
+      <li><a href="board.html" class="active">전략 게시판</a></li>
+      <li><a href="index.html#rules">패 랭킹</a></li>
+      <li><a href="index.html#strategy">전략 가이드</a></li>
+      <li><a href="index.html#faq">FAQ</a></li>
+    </ul>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀ 라이트</button>
+  </div>
+</nav>
+
+<div class="board-hero">
+  <div class="board-hero-badge">✦ 포커 전략 아카이브 ✦</div>
+  <h1>포커 <span class="g">전략 게시판</span></h1>
+  <p>레인지, 팟 오즈, 핸드 분석까지 실전에 바로 쓰는 전략 글 모음</p>
+</div>
+
+<div class="cat-section">
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab active" onclick="filterPosts('전체')">전체</button>
+    <button class="cat-tab" onclick="filterPosts('전략')">전략</button>
+    <button class="cat-tab" onclick="filterPosts('핸드분석')">핸드 분석</button>
+    <button class="cat-tab" onclick="filterPosts('확률계산')">확률 계산</button>
+  </div>
+</div>
+
+<main class="board-section">
+  <div class="board-list" id="board-list"></div>
+</main>
+
+<footer class="footer">
+  <div class="footer-bottom">
+    <span>© 2025 홀덤 분석기. All rights reserved.</span>
+    <span><a href="index.html">홈으로</a> &nbsp;|&nbsp; <a href="index.html#privacy">개인정보처리방침</a></span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+
+(function() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = saved === 'dark' ? '☀ 라이트' : '🌙 다크';
+})();
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀ 라이트' : '🌙 다크';
+}
+
+const POSTS = [
+  {
+    id: 1, category: '전략', date: '2025-05-01',
+    title: '포지션별 오픈 레인지 완전 가이드',
+    preview: '포지션은 홀덤에서 가장 중요한 요소 중 하나입니다. 어떤 포지션에서 어떤 패를 오픈해야 하는지 정리했습니다.',
+    content: `
+      <h4>포지션이란?</h4>
+      <p>홀덤에서 포지션(Position)은 딜러 버튼을 기준으로 행동 순서를 나타냅니다. 늦게 행동할수록 상대방의 액션을 먼저 보고 결정할 수 있어 유리합니다.</p>
+      <table>
+        <tr><th>포지션</th><th>오픈 레인지 (약)</th><th>특징</th></tr>
+        <tr><td>UTG (언더더건)</td><td>약 13~15%</td><td>가장 먼저 행동, 타이트하게 플레이</td></tr>
+        <tr><td>HJ (하이잭)</td><td>약 16~18%</td><td>UTG보다 약간 넓게</td></tr>
+        <tr><td>CO (컷오프)</td><td>약 23~26%</td><td>후반 포지션 시작, 레인지 확대</td></tr>
+        <tr><td>BTN (버튼)</td><td>약 40~45%</td><td>가장 유리, 가장 넓은 레인지</td></tr>
+        <tr><td>SB (스몰 블라인드)</td><td>약 35~40%</td><td>포스트플랍 불리, 선택적 확대</td></tr>
+      </table>
+      <h4>UTG 오픈 추천 핸드</h4>
+      <ul>
+        <li>포켓 페어: 77 이상 (AA, KK, QQ, JJ, TT, 99, 88, 77)</li>
+        <li>수티드 에이스: AKs, AQs, AJs, ATs</li>
+        <li>오프수트 브로드웨이: AKo, AQo</li>
+        <li>수티드 브로드웨이: KQs, KJs, QJs</li>
+      </ul>
+      <h4>BTN 오픈 추천 핸드 추가 범위</h4>
+      <ul>
+        <li>작은 포켓 페어: 22~66 포함</li>
+        <li>수티드 커넥터: T9s, 98s, 87s, 76s, 65s, 54s</li>
+        <li>수티드 갭 커넥터: T8s, 97s, 86s</li>
+        <li>약한 에이스: A9s~A2s, A8o~A5o</li>
+      </ul>
+      <div class="tip"><strong>핵심 원칙:</strong> 포지션이 늦을수록 레인지를 넓히세요. 버튼에서는 유리한 포지션을 최대한 활용하는 것이 GTO에 가깝습니다.</div>
+      <a href="game.html" class="post-tool-link">🎮 핸드 연습으로 직접 확인하기</a>
+    `
+  },
+  {
+    id: 2, category: '핸드분석', date: '2025-05-03',
+    title: 'AA vs KK — 프리플랍 올인, 언제 콜해야 하나',
+    preview: 'AA와 KK의 프리플랍 맞대결은 홀덤에서 가장 극적인 순간입니다. 확률과 상황별 판단 기준을 정리했습니다.',
+    content: `
+      <h4>AA vs KK 기본 확률</h4>
+      <p>프리플랍 올인 상황에서 AA는 KK를 상대로 약 <strong>82% 대 18%</strong>의 압도적인 우위를 가집니다. 이 차이는 K가 2장 남아있어 KK가 셋을 만들 확률이 낮기 때문입니다.</p>
+      <table>
+        <tr><th>핸드 매치업</th><th>우위 확률</th></tr>
+        <tr><td>AA vs KK</td><td>AA 81.9% / KK 18.1%</td></tr>
+        <tr><td>AA vs QQ</td><td>AA 80.4% / QQ 19.6%</td></tr>
+        <tr><td>KK vs QQ</td><td>KK 80.0% / QQ 20.0%</td></tr>
+        <tr><td>AA vs AKs</td><td>AA 68.8% / AKs 31.2%</td></tr>
+      </table>
+      <h4>KK 보유 시 프리플랍 올인 콜 여부</h4>
+      <p>KK를 가지고 있을 때 프리플랍 4벳 또는 5벳 상황에서 올인 콜은 거의 항상 옳습니다. 상대가 AA일 가능성보다 AK, QQ, JJ 등 더 약한 핸드일 가능성이 높기 때문입니다.</p>
+      <ul>
+        <li>딥 스택(100BB 이상): AA 가능성을 고려해 극히 드문 상황에서만 폴드 검토</li>
+        <li>숏 스택(30BB 이하): 무조건 콜이 수학적으로 올바름</li>
+        <li>레이크가 높은 저스테이크: 기댓값 계산 후 판단</li>
+      </ul>
+      <h4>AA 보유 시 전략</h4>
+      <p>AA는 모든 프리플랍 상황에서 올인이 거의 항상 최선입니다. 단, 슬로우 플레이(limp 또는 소형 레이즈)로 팟을 키우는 전략도 상대방에 따라 유효합니다.</p>
+      <div class="tip"><strong>실전 팁:</strong> KK로 프리플랍 폴드하는 것은 매우 드문 경우에만 옳습니다. 대부분의 상황에서 콜 또는 올인이 기댓값(EV)이 높습니다.</div>
+      <a href="odds.html" class="post-tool-link">🧮 AA vs KK 직접 확률 계산하기</a>
+    `
+  },
+  {
+    id: 3, category: '확률계산', date: '2025-05-05',
+    title: '팟 오즈 계산법 완전 정복',
+    preview: '팟 오즈(Pot Odds)를 이해하면 수학적으로 올바른 콜/폴드 결정을 내릴 수 있습니다. 계산법과 실전 적용법을 알아봅니다.',
+    content: `
+      <h4>팟 오즈란?</h4>
+      <p>팟 오즈는 현재 팟 크기 대비 내가 콜해야 하는 금액의 비율입니다. 이 비율이 내 핸드의 히트 확률보다 유리하면 콜이 수학적으로 옳습니다.</p>
+      <h4>계산 공식</h4>
+      <p><strong>팟 오즈(%) = 콜 금액 ÷ (팟 + 콜 금액) × 100</strong></p>
+      <table>
+        <tr><th>현재 팟</th><th>상대 베팅</th><th>팟 오즈</th><th>필요 히트 확률</th></tr>
+        <tr><td>100</td><td>50</td><td>50 ÷ 150 = 33%</td><td>33% 이상이면 콜</td></tr>
+        <tr><td>100</td><td>100</td><td>100 ÷ 200 = 50%</td><td>50% 이상이면 콜</td></tr>
+        <tr><td>100</td><td>25</td><td>25 ÷ 125 = 20%</td><td>20% 이상이면 콜</td></tr>
+      </table>
+      <h4>실전 예시</h4>
+      <p>플랍에서 플러시 드로우(아웃츠 9개)를 보유하고 있고, 팟이 100, 상대가 50을 베팅했을 경우:</p>
+      <ul>
+        <li>팟 오즈: 50 ÷ 150 = 33%</li>
+        <li>플러시 드로우 히트 확률(턴): 9 × 2 = 18%</li>
+        <li>플러시 드로우 히트 확률(턴+리버): 9 × 4 = 36%</li>
+        <li>결론: 두 장을 볼 수 있다면 콜, 한 장만 본다면 팟 오즈 부족 → 폴드 또는 레이즈</li>
+      </ul>
+      <h4>임플라이드 오즈 (Implied Odds)</h4>
+      <p>현재 팟 오즈가 부족해도 히트했을 때 상대에게 추가로 딸 수 있는 금액을 고려한 임플라이드 오즈가 충분하다면 콜이 유리할 수 있습니다.</p>
+      <div class="tip"><strong>핵심 공식:</strong> 팟 오즈(%) &lt; 내 히트 확률(%) → 콜이 수학적으로 유리. 반대라면 폴드를 검토하세요.</div>
+      <a href="odds.html" class="post-tool-link">🧮 실시간 확률 계산기로 연습하기</a>
+    `
+  },
+  {
+    id: 4, category: '전략', date: '2025-05-07',
+    title: '스타팅 핸드 그룹: 어떤 패를 플레이해야 하나',
+    preview: '프리플랍에서 어떤 패를 플레이하고 어떤 패를 폴드할지 결정하는 것이 홀덤 실력의 기초입니다. 핸드 그룹별로 정리했습니다.',
+    content: `
+      <h4>핸드 그룹 분류 (Sklansky 기반)</h4>
+      <p>스타팅 핸드는 강도에 따라 그룹으로 나뉩니다. 초보자는 그룹 1~3에 속하는 핸드만 플레이하는 것을 권장합니다.</p>
+      <table>
+        <tr><th>그룹</th><th>핸드</th><th>플레이 권장 포지션</th></tr>
+        <tr><td>그룹 1 (최강)</td><td>AA, KK, QQ, JJ, AKs</td><td>모든 포지션</td></tr>
+        <tr><td>그룹 2</td><td>TT, AQs, AJs, KQs, AKo</td><td>모든 포지션</td></tr>
+        <tr><td>그룹 3</td><td>99, 88, ATs, KJs, QJs, JTs, AQo</td><td>CO 이후</td></tr>
+        <tr><td>그룹 4</td><td>77, 66, A9s~A2s, KTs, QTs, J9s, T9s</td><td>BTN, SB</td></tr>
+        <tr><td>그룹 5 (투기성)</td><td>55~22, 수티드 커넥터, 약한 수티드 에이스</td><td>딥 스택 BTN만</td></tr>
+      </table>
+      <h4>수티드(Suited) vs 오프수트(Offsuit)</h4>
+      <p>같은 숫자 조합이라도 수티드 핸드는 플러시 가능성 덕분에 오프수트보다 약 3~4% 승률이 높습니다.</p>
+      <ul>
+        <li>AKs vs AKo: AKs가 약 3% 더 높은 승률</li>
+        <li>수티드 커넥터(T9s): 너트 플러시 + 스트레이트 동시 노림 가능</li>
+        <li>약한 수티드 핸드도 딥 스택에서 가치 있음 (임플라이드 오즈)</li>
+      </ul>
+      <h4>초보자가 피해야 할 함정 핸드</h4>
+      <ul>
+        <li><strong>KJo, QJo, KTo</strong>: 도미네이트(AK, AQ 등에 큰 차이로 패배) 당하기 쉬움</li>
+        <li><strong>A2o~A8o</strong>: 페어를 만들어도 킥커 불리</li>
+        <li><strong>연속되지 않은 낮은 카드 (74o, 83o)</strong>: 거의 항상 폴드</li>
+      </ul>
+      <div class="tip"><strong>초보 전략:</strong> 처음에는 그룹 1~2 핸드만 플레이하세요. 경험이 쌓이면 포지션에 따라 레인지를 넓혀가는 것이 좋습니다.</div>
+      <a href="game.html" class="post-tool-link">🎮 스타팅 핸드 승률 직접 확인하기</a>
+    `
+  },
+  {
+    id: 5, category: '확률계산', date: '2025-05-09',
+    title: '아웃츠로 히트 확률 계산하는 법 — 룰 오브 4와 2',
+    preview: '아웃츠(Outs)를 알면 내 드로우 핸드가 히트할 확률을 빠르게 계산할 수 있습니다. 실전에서 바로 쓸 수 있는 룰 오브 4와 2를 소개합니다.',
+    content: `
+      <h4>아웃츠(Outs)란?</h4>
+      <p>아웃츠는 현재 내 패를 개선해줄 남은 덱의 카드 수입니다. 아웃츠 수를 알면 간단한 공식으로 히트 확률을 계산할 수 있습니다.</p>
+      <h4>주요 드로우별 아웃츠</h4>
+      <table>
+        <tr><th>드로우 종류</th><th>아웃츠</th><th>턴 히트%</th><th>턴+리버 히트%</th></tr>
+        <tr><td>플러시 드로우</td><td>9</td><td>19%</td><td>35%</td></tr>
+        <tr><td>오픈엔드 스트레이트 (OESD)</td><td>8</td><td>17%</td><td>31%</td></tr>
+        <tr><td>투 오버카드</td><td>6</td><td>13%</td><td>24%</td></tr>
+        <tr><td>거트샷 스트레이트 (GSSD)</td><td>4</td><td>9%</td><td>17%</td></tr>
+        <tr><td>원페어 → 트리플</td><td>2</td><td>4%</td><td>8%</td></tr>
+        <tr><td>플러시+OESD 콤보</td><td>15</td><td>32%</td><td>54%</td></tr>
+      </table>
+      <h4>룰 오브 4와 2</h4>
+      <p>복잡한 계산 없이 암산으로 확률을 구하는 방법입니다:</p>
+      <ul>
+        <li><strong>플랍 이후 (2장 남음)</strong>: 아웃츠 × 4 ≈ 히트 확률(%)</li>
+        <li><strong>턴 이후 (1장 남음)</strong>: 아웃츠 × 2 ≈ 히트 확률(%)</li>
+      </ul>
+      <p>예시: 플러시 드로우(9 아웃츠) → 플랍에서 9×4=36%, 턴에서 9×2=18%</p>
+      <h4>아웃츠 계산 시 주의점</h4>
+      <ul>
+        <li>상대방이 더 강한 드로우를 가질 경우 "더티 아웃츠(Dirty Outs)"가 생겨 실제 아웃츠가 줄어듦</li>
+        <li>플러시 드로우 + 페어가 있다면 풀하우스 아웃츠도 포함</li>
+        <li>넛(Nut) 드로우 여부 확인 — 최고 패로 완성되는지 중요</li>
+      </ul>
+      <div class="tip"><strong>암기 팁:</strong> 플러시=9, OESD=8, 거트샷=4. 이 세 개만 외워도 실전에서 빠른 판단이 가능합니다.</div>
+      <a href="odds.html" class="post-tool-link">🧮 아웃츠 자동 계산기로 확인하기</a>
+    `
+  },
+  {
+    id: 6, category: '전략', date: '2025-05-11',
+    title: '3벳 전략: 언제 3벳하고 언제 콜할까',
+    preview: '3벳은 단순히 강한 패에만 쓰는 것이 아닙니다. 밸류 3벳과 블러프 3벳의 균형을 이해하면 프리플랍 전략이 한 단계 높아집니다.',
+    content: `
+      <h4>3벳이란?</h4>
+      <p>3벳(3-bet)은 오픈 레이즈에 대한 재레이즈입니다. 블라인드가 1벳, 오픈이 2벳, 재레이즈가 3벳입니다.</p>
+      <h4>밸류 3벳 vs 블러프 3벳</h4>
+      <p>3벳 레인지는 크게 두 가지로 구성됩니다:</p>
+      <ul>
+        <li><strong>밸류 3벳</strong>: 상대가 콜하거나 4벳해도 이길 수 있는 강한 패 (AA, KK, QQ, AKs 등)</li>
+        <li><strong>블러프 3벳</strong>: 폴드 에쿼티를 노리는 패 (수티드 A 낮은 것, 수티드 커넥터 등)</li>
+      </ul>
+      <p>GTO에서는 밸류와 블러프를 적절한 비율로 혼합해 상대가 레인지를 읽지 못하게 합니다.</p>
+      <h4>포지션별 3벳 기준</h4>
+      <table>
+        <tr><th>상황</th><th>3벳 빈도</th><th>추천 핸드</th></tr>
+        <tr><td>IP (포지션 우위)</td><td>더 넓게</td><td>밸류+블러프 혼합</td></tr>
+        <tr><td>OOP (포지션 불리)</td><td>타이트하게</td><td>밸류 위주</td></tr>
+        <tr><td>vs 타이트 오픈</td><td>타이트하게</td><td>AA, KK, QQ, AKs 위주</td></tr>
+        <tr><td>vs 루즈 오픈</td><td>넓게</td><td>더 많은 블러프 포함</td></tr>
+      </table>
+      <h4>3벳 vs 콜 결정 기준</h4>
+      <ul>
+        <li>포지션이 좋으면 콜로 팟 컨트롤 + 포스트플랍 공략 가능</li>
+        <li>OOP이거나 상대가 타이트하면 3벳으로 주도권 확보</li>
+        <li>매우 강한 핸드(AA, KK)는 대부분 상황에서 3벳이 기댓값 높음</li>
+      </ul>
+      <div class="tip"><strong>실전 팁:</strong> 초보자는 3벳을 밸류 핸드(AA~QQ, AKs)에만 제한하세요. 블러프 3벳은 상대 읽기와 포지션 이해가 선행되어야 합니다.</div>
+      <a href="game.html" class="post-tool-link">🎮 핸드 연습에서 3벳 상황 연습하기</a>
+    `
+  },
+  {
+    id: 7, category: '핸드분석', date: '2025-05-13',
+    title: '플러시 드로우 핸드 — 콜 vs 세미 블러프 레이즈',
+    preview: '플러시 드로우는 홀덤에서 가장 흔한 드로우 중 하나입니다. 단순 콜을 넘어 세미 블러프 레이즈로 주도권을 잡는 방법을 분석합니다.',
+    content: `
+      <h4>플러시 드로우의 기본 가치</h4>
+      <p>플랍에서 플러시 드로우를 가지고 있다면 9장의 아웃츠를 보유한 것입니다. 턴과 리버 두 장을 볼 경우 약 35%의 히트 확률을 갖습니다.</p>
+      <h4>콜이 유리한 상황</h4>
+      <ul>
+        <li>팟 오즈가 충분할 때 (콜 금액이 팟의 33% 이하)</li>
+        <li>포지션 우위(IP)가 있을 때</li>
+        <li>임플라이드 오즈가 높은 딥 스택 상황</li>
+        <li>상대방이 계속 베팅할 가능성이 높아 히트 후 큰 팟 기대 가능</li>
+      </ul>
+      <h4>세미 블러프 레이즈가 유리한 상황</h4>
+      <ul>
+        <li>상대가 약한 핸드(탑 페어 이하)를 가졌다고 판단될 때</li>
+        <li>OOP 상황에서 주도권을 가져올 필요가 있을 때</li>
+        <li>보드가 상대 레인지에 불리할 때 (예: 상대 UTG 레인지 vs 플러시 보드)</li>
+        <li>폴드 에쿼티 + 히트 에쿼티 합산이 충분할 때</li>
+      </ul>
+      <h4>넛 플러시 드로우 vs 약한 플러시 드로우</h4>
+      <p>넛 플러시 드로우(A 하이 플러시)와 약한 플러시 드로우(6 하이 플러시)는 전략이 다릅니다. 약한 플러시 드로우는 히트해도 역플러시에 질 수 있으므로 신중해야 합니다.</p>
+      <div class="tip"><strong>핵심 판단:</strong> 넛 플러시 드로우 + 오버카드 = 세미 블러프 레이즈 강력 추천. 약한 플러시 드로우 OOP = 콜 또는 폴드.</div>
+      <a href="odds.html" class="post-tool-link">🧮 플러시 드로우 승률 계산하기</a>
+    `
+  },
+  {
+    id: 8, category: '전략', date: '2025-05-15',
+    title: '뱅크롤 관리의 모든 것 — 포커를 오래 하려면',
+    preview: '뱅크롤 관리(Bankroll Management)는 포커에서 장기적으로 살아남기 위한 필수 스킬입니다. 스테이크별 권장 바이인 수와 실전 원칙을 정리했습니다.',
+    content: `
+      <h4>뱅크롤 관리가 중요한 이유</h4>
+      <p>포커는 단기적으로 분산(Variance)이 크기 때문에, 실력이 있어도 연속으로 패배하는 다운스윙 구간이 반드시 찾아옵니다. 뱅크롤 관리는 이 구간을 버텨내기 위한 안전 장치입니다.</p>
+      <h4>스테이크별 권장 바이인 수</h4>
+      <table>
+        <tr><th>게임 형태</th><th>권장 바이인 수</th><th>비고</th></tr>
+        <tr><td>캐시 게임 (일반)</td><td>20~30 바이인</td><td>최소 권장</td></tr>
+        <tr><td>캐시 게임 (보수적)</td><td>50 바이인 이상</td><td>장기 안정성</td></tr>
+        <tr><td>MTT 토너먼트</td><td>100 바이인 이상</td><td>분산이 매우 큼</td></tr>
+        <tr><td>SNG (싱글 테이블)</td><td>50 바이인</td><td>중간 분산</td></tr>
+      </table>
+      <h4>스테이크 이동 기준</h4>
+      <ul>
+        <li><strong>올라갈 때</strong>: 현재 스테이크에서 30 바이인 이상 수익 달성 시</li>
+        <li><strong>내려올 때</strong>: 바이인 수가 20 이하로 줄어들 경우 (감정 배제)</li>
+        <li>스테이크 이동은 항상 보수적으로 판단하는 것이 안전</li>
+      </ul>
+      <h4>틸트 관리</h4>
+      <p>뱅크롤 관리와 함께 감정 관리(틸트 컨트롤)가 중요합니다. 큰 팟을 잃었거나 연속으로 지는 상황에서 스테이크를 올리거나 무리한 플레이를 하면 뱅크롤이 빠르게 소진됩니다.</p>
+      <ul>
+        <li>일일 손실 한도 설정 (예: 3 바이인 이상 잃으면 중단)</li>
+        <li>세션 시간 제한 (집중력 유지)</li>
+        <li>틸트 신호 파악: 손이 빨라지거나 평소와 다른 플레이가 나올 때</li>
+      </ul>
+      <div class="tip"><strong>황금 원칙:</strong> 한 세션에 뱅크롤의 5% 이상을 잃었다면 쉬세요. 장기적인 수익은 많이 이기는 것보다 큰 손실을 피하는 데서 나옵니다.</div>
+      <a href="game.html" class="post-tool-link">🎮 멘탈 관리하며 핸드 연습하기</a>
+    `
+  }
+];
+
+let activeCat = '전체';
+let openId = null;
+
+function filterPosts(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent.trim() === cat || (cat === '전체' && t.textContent.trim() === '전체'));
+  });
+  openId = null;
+  renderPosts();
+}
+
+function togglePost(id) {
+  openId = openId === id ? null : id;
+  renderPosts();
+}
+
+function renderPosts() {
+  const list = document.getElementById('board-list');
+  const filtered = activeCat === '전체' ? POSTS : POSTS.filter(p => p.category === activeCat);
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="board-empty">해당 카테고리의 글이 없습니다.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => {
+    const isOpen = openId === p.id;
+    return `
+      <article class="post-card" id="post-${p.id}">
+        <div class="post-head" onclick="togglePost(${p.id})">
+          <div class="post-meta">
+            <span class="post-num">#${p.id}</span>
+            <span class="post-cat ${p.category}">${p.category}</span>
+            <span class="post-date">${p.date}</span>
+          </div>
+          <div class="post-title">${p.title}</div>
+          <div class="post-preview">${p.preview}</div>
+        </div>
+        <div class="post-footer">
+          <button class="post-toggle ${isOpen ? 'open' : ''}" onclick="togglePost(${p.id})">
+            ${isOpen ? '접기' : '자세히 보기'} <span class="arr">▼</span>
+          </button>
+        </div>
+        <div class="post-body ${isOpen ? 'open' : ''}">
+          <div class="post-body-inner">${p.content}</div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+renderPosts();
+</script>
+</body>
+</html>
