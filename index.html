@@ -13,203 +13,270 @@
   <meta property="og:type" content="website">
   <title>홀덤 핸드 분석기 | 홀덤 분석기</title>
   <style>
-    /* ═══════════════════════════════════
-       CSS 변수 (다크 / 라이트 모드)
-    ═══════════════════════════════════ */
     :root {
-      --bg-base:    #1a1a2e;
-      --bg-surface: #16213e;
-      --bg-deep:    #0a2540;
-      --bg-card:    #0f3460;
-      --accent:     #4ade80;
-      --accent2:    #22c55e;
-      --danger:     #e94560;
-      --warn:       #fbbf24;
-      --info:       #90cdf4;
-      --text-1:     #e2e8f0;
-      --text-2:     #a0aec0;
-      --text-3:     #4a5568;
-      --border:     #1e4d8c;
-      --card-white: #ffffff;
-      --card-shadow:rgba(0,0,0,0.45);
-      --nav-bg:     rgba(22,33,62,0.97);
-      --shadow-lg:  0 20px 60px rgba(0,0,0,0.55);
-      --radius-lg:  20px;
-      --radius-md:  12px;
-      --radius-sm:  8px;
+      --bg-base:     #0b0810;
+      --bg-surface:  #130e1a;
+      --bg-deep:     #0e0a14;
+      --bg-card:     #1c1228;
+      --gold:        #d4af37;
+      --gold-l:      #f0d060;
+      --gold-d:      #8a6f20;
+      --crimson:     #b02020;
+      --crimson-l:   #e03030;
+      --accent:      #d4af37;
+      --accent2:     #b8960e;
+      --danger:      #e74c3c;
+      --warn:        #f39c12;
+      --info:        #5ab4f0;
+      --text-1:      #f0e6d0;
+      --text-2:      #a09080;
+      --text-3:      #504038;
+      --border:      #2a1e14;
+      --border-g:    rgba(212,175,55,0.22);
+      --nav-bg:      rgba(11,8,16,0.96);
+      --shadow-lg:   0 24px 64px rgba(0,0,0,0.75);
+      --shadow-gold: 0 0 48px rgba(212,175,55,0.18);
+      --radius-lg:   20px;
+      --radius-md:   12px;
+      --radius-sm:   8px;
     }
     [data-theme="light"] {
-      --bg-base:    #f0f4f8;
-      --bg-surface: #ffffff;
-      --bg-deep:    #e8f0fe;
-      --bg-card:    #dbeafe;
-      --accent:     #16a34a;
-      --accent2:    #15803d;
-      --danger:     #dc2626;
-      --warn:       #d97706;
-      --info:       #2563eb;
-      --text-1:     #1a202c;
-      --text-2:     #4a5568;
-      --text-3:     #9ca3af;
-      --border:     #bfdbfe;
-      --card-white: #ffffff;
-      --card-shadow:rgba(0,0,0,0.12);
-      --nav-bg:     rgba(255,255,255,0.97);
-      --shadow-lg:  0 20px 60px rgba(0,0,0,0.12);
+      --bg-base:     #f7f2ea;
+      --bg-surface:  #ffffff;
+      --bg-deep:     #ede5d8;
+      --bg-card:     #e4d9c8;
+      --gold:        #9a7a10;
+      --gold-l:      #c4a020;
+      --gold-d:      #6a5408;
+      --crimson:     #9a2010;
+      --crimson-l:   #c03020;
+      --accent:      #9a7a10;
+      --accent2:     #7a6010;
+      --danger:      #c03020;
+      --warn:        #a06000;
+      --info:        #1a60b0;
+      --text-1:      #1a1008;
+      --text-2:      #503828;
+      --text-3:      #9a8878;
+      --border:      #d0c0a8;
+      --border-g:    rgba(154,122,16,0.3);
+      --nav-bg:      rgba(247,242,234,0.97);
+      --shadow-lg:   0 24px 64px rgba(0,0,0,0.12);
+      --shadow-gold: 0 0 48px rgba(154,122,16,0.1);
     }
 
-    /* ═══════════════════════════════════
-       기본 리셋
-    ═══════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg-base);
-      color: var(--text-1);
-      line-height: 1.7;
-      transition: background 0.3s, color 0.3s;
+      background: var(--bg-base); color: var(--text-1);
+      line-height: 1.7; transition: background 0.3s, color 0.3s;
     }
-    a { color: var(--accent); text-decoration: none; }
+    a { color: var(--gold); text-decoration: none; }
     a:hover { text-decoration: underline; }
     img { max-width: 100%; }
 
-    /* ═══════════════════════════════════
-       내비게이션
-    ═══════════════════════════════════ */
+    /* ── 네비게이션 ── */
     .nav {
       position: sticky; top: 0; z-index: 100;
       background: var(--nav-bg);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-g);
       padding: 0 24px;
     }
     .nav-inner {
       max-width: 1100px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
-      height: 60px; gap: 16px;
+      height: 62px; gap: 16px;
     }
-    .nav-logo {
-      font-size: 18px; font-weight: 800;
-      color: var(--text-1); white-space: nowrap;
-    }
-    .nav-logo span { color: var(--accent); }
-    .nav-links {
-      display: flex; align-items: center; gap: 4px;
-      list-style: none; flex-wrap: wrap;
-    }
+    .nav-logo { font-size: 19px; font-weight: 900; color: var(--text-1); white-space: nowrap; letter-spacing: -0.5px; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; flex-wrap: wrap; }
     .nav-links a {
-      color: var(--text-2); font-size: 14px; font-weight: 500;
+      color: var(--text-2); font-size: 13.5px; font-weight: 500;
       padding: 6px 12px; border-radius: var(--radius-sm);
-      transition: background 0.15s, color 0.15s;
+      transition: color 0.15s, background 0.15s;
     }
-    .nav-links a:hover { background: var(--bg-card); color: var(--accent); text-decoration: none; }
+    .nav-links a:hover { color: var(--gold); background: rgba(212,175,55,0.08); text-decoration: none; }
     .theme-btn {
-      background: var(--bg-card); border: 1px solid var(--border);
+      background: transparent; border: 1px solid var(--border-g);
       color: var(--text-2); border-radius: 999px;
-      padding: 6px 14px; font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+      padding: 6px 16px; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap; letter-spacing: 0.5px;
     }
-    .theme-btn:hover { background: var(--accent); color: #0d1f0d; border-color: var(--accent); }
+    .theme-btn:hover { background: var(--gold); color: #0b0810; border-color: var(--gold); }
 
-    /* ═══════════════════════════════════
-       히어로
-    ═══════════════════════════════════ */
+    /* ── 히어로 ── */
     .hero {
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      padding: 64px 24px 56px;
-      text-align: center;
+      position: relative; overflow: hidden;
+      padding: 90px 24px 80px; text-align: center;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(100,20,20,0.35) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 50% at 80% 80%, rgba(40,10,60,0.3) 0%, transparent 70%),
+                  var(--bg-base);
+      border-bottom: 1px solid var(--border-g);
+    }
+    .hero-suits {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .suit-float {
+      position: absolute; font-size: clamp(40px,6vw,90px);
+      color: var(--gold); opacity: 0.05;
+      animation: floatSuit linear infinite;
+    }
+    .suit-float:nth-child(1) { top: 10%; left: 6%;  animation-duration: 9s;  animation-delay: 0s;   font-size: 70px; }
+    .suit-float:nth-child(2) { top: 60%; left: 3%;  animation-duration: 12s; animation-delay: -3s;  font-size: 50px; opacity: 0.04; color: var(--crimson-l); }
+    .suit-float:nth-child(3) { top: 20%; right: 8%; animation-duration: 10s; animation-delay: -2s;  font-size: 80px; }
+    .suit-float:nth-child(4) { top: 70%; right: 4%; animation-duration: 8s;  animation-delay: -5s;  font-size: 55px; opacity: 0.04; color: var(--crimson-l); }
+    .suit-float:nth-child(5) { top: 40%; left: 15%; animation-duration: 14s; animation-delay: -7s;  font-size: 38px; }
+    .suit-float:nth-child(6) { top: 50%; right: 14%;animation-duration: 11s; animation-delay: -1s;  font-size: 44px; opacity: 0.03; }
+    @keyframes floatSuit {
+      0%   { transform: translateY(0)    rotate(0deg);   }
+      33%  { transform: translateY(-22px) rotate(8deg);  }
+      66%  { transform: translateY(10px)  rotate(-5deg); }
+      100% { transform: translateY(0)    rotate(0deg);   }
     }
     .hero-badge {
-      display: inline-block;
-      background: rgba(74,222,128,0.15);
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      border-radius: 999px; padding: 4px 14px;
-      font-size: 12px; font-weight: 700;
-      letter-spacing: 1px; text-transform: uppercase;
-      margin-bottom: 18px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border-g);
+      background: rgba(212,175,55,0.08);
+      color: var(--gold); border-radius: 999px;
+      padding: 5px 16px; font-size: 11px; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 22px;
     }
     .hero h1 {
-      font-size: clamp(28px, 5vw, 46px);
-      font-weight: 800; line-height: 1.2;
-      margin-bottom: 16px;
+      font-size: clamp(32px, 6vw, 58px); font-weight: 900;
+      line-height: 1.15; margin-bottom: 18px; letter-spacing: -1px;
     }
-    .hero h1 em { color: var(--accent); font-style: normal; }
+    .hero h1 .g {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 50%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
     .hero p {
       font-size: 17px; color: var(--text-2);
-      max-width: 540px; margin: 0 auto 32px;
+      max-width: 520px; margin: 0 auto 36px; line-height: 1.8;
     }
-    .hero-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-    .btn-primary {
-      background: var(--accent); color: #0d1f0d;
-      padding: 13px 28px; border-radius: var(--radius-md);
-      font-size: 16px; font-weight: 700; border: none; cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
+    .hero-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .btn-gold {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%);
+      color: #0b0810; padding: 14px 32px; border-radius: var(--radius-md);
+      font-size: 15px; font-weight: 800; border: none; cursor: pointer;
+      text-decoration: none; letter-spacing: 0.3px;
+      box-shadow: 0 4px 28px rgba(212,175,55,0.4);
+      transition: box-shadow 0.2s, transform 0.15s;
     }
-    .btn-primary:hover { background: var(--accent2); }
-    .btn-primary:active { transform: scale(0.97); }
-    .btn-secondary {
-      background: var(--bg-card); color: var(--info);
-      padding: 13px 28px; border-radius: var(--radius-md);
-      font-size: 16px; font-weight: 700; border: 1px solid var(--border); cursor: pointer;
-      transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    .btn-gold:hover { box-shadow: 0 6px 36px rgba(212,175,55,0.6); transform: translateY(-2px); text-decoration: none; color: #0b0810; }
+    .btn-gold:active { transform: scale(0.97) translateY(0); }
+    .btn-outline-gold {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--gold);
+      padding: 14px 32px; border-radius: var(--radius-md);
+      font-size: 15px; font-weight: 700;
+      border: 1px solid var(--border-g); cursor: pointer;
+      text-decoration: none; letter-spacing: 0.3px;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
     }
-    .btn-secondary:hover { background: #1a4f85; border-color: var(--info); }
-    .btn-secondary:active { transform: scale(0.97); }
-    .btn-outline {
-      background: transparent; color: var(--text-2);
-      padding: 13px 28px; border-radius: var(--radius-md);
-      font-size: 16px; font-weight: 700;
-      border: 1px solid var(--border); cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-outline-gold:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); text-decoration: none; color: var(--gold); transform: translateY(-2px); }
+    .btn-outline-gold:active { transform: scale(0.97) translateY(0); }
     .hero-stats {
-      display: flex; justify-content: center; gap: 40px;
-      margin-top: 40px; flex-wrap: wrap;
+      display: flex; justify-content: center; gap: 48px;
+      margin-top: 52px; flex-wrap: wrap;
     }
     .hero-stat { text-align: center; }
-    .hero-stat strong { display: block; font-size: 26px; font-weight: 800; color: var(--accent); }
-    .hero-stat span { font-size: 13px; color: var(--text-3); }
+    .hero-stat strong {
+      display: block; font-size: 28px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-stat span { font-size: 12px; color: var(--text-3); letter-spacing: 0.5px; text-transform: uppercase; }
+    .hero-divider {
+      width: 1px; height: 36px; background: var(--border-g);
+      align-self: center;
+    }
 
-    /* ═══════════════════════════════════
-       공통 섹션 래퍼
-    ═══════════════════════════════════ */
-    .section { padding: 64px 24px; }
-    .section-alt { background: var(--bg-surface); }
-    .container { max-width: 960px; margin: 0 auto; }
+    /* ── 기능 카드 ── */
+    .features-section {
+      padding: 72px 24px;
+      background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-deep) 100%);
+    }
+    .features-grid {
+      max-width: 960px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-g);
+      border-radius: var(--radius-lg);
+      padding: 30px 26px;
+      text-align: center;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+      text-decoration: none; display: block; color: inherit;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(212,175,55,0.45); box-shadow: 0 8px 40px rgba(212,175,55,0.1); transform: translateY(-4px); text-decoration: none; color: inherit; }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: rgba(212,175,55,0.1); border: 1px solid var(--border-g);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin: 0 auto 16px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 8px; color: var(--text-1); }
+    .feature-card p { font-size: 13.5px; color: var(--text-2); line-height: 1.7; }
+    .feature-tag {
+      display: inline-block; margin-top: 14px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      color: var(--gold); text-transform: uppercase;
+    }
+
+    /* ── 공통 섹션 ── */
+    .section { padding: 72px 24px; }
+    .section-alt {
+      background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-deep) 100%);
+    }
+    .container    { max-width: 960px;  margin: 0 auto; }
     .container-lg { max-width: 1100px; margin: 0 auto; }
-    .section-head { text-align: center; margin-bottom: 40px; }
-    .section-head h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; margin-bottom: 8px; }
-    .section-head h2 em { color: var(--accent); font-style: normal; }
+    .section-head { text-align: center; margin-bottom: 44px; }
+    .section-head h2 {
+      font-size: clamp(22px, 3vw, 32px); font-weight: 900;
+      margin-bottom: 10px; letter-spacing: -0.5px;
+    }
+    .section-head h2 .g {
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
     .section-head p { color: var(--text-2); font-size: 15px; }
-    .divider { width: 48px; height: 3px; background: var(--accent); border-radius: 2px; margin: 12px auto 0; }
+    .divider {
+      width: 56px; height: 2px; margin: 14px auto 0;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      border-radius: 2px;
+    }
 
+    /* ── 미니 카드 ── */
     .mini-card {
-      width: 32px; height: 46px;
-      background: #ffffff; border-radius: 5px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.22), 0 3px 10px rgba(0,0,0,0.12);
-      border: 1px solid rgba(0,0,0,0.08);
-      flex-shrink: 0; gap: 1px;
+      width: 32px; height: 46px; background: #fff; border-radius: 5px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.3), 0 3px 10px rgba(0,0,0,0.15);
+      border: 1px solid rgba(0,0,0,0.08); flex-shrink: 0; gap: 1px;
     }
     .mini-card .mv { font-size: 15px; font-weight: 900; line-height: 1; }
     .mini-card .ms { font-size: 14px; line-height: 1; }
-    .mini-card.red { color: #e11d48; }
+    .mini-card.red   { color: #e11d48; }
     .mini-card.black { color: #111827; }
     .mini-card.highlighted {
       border: 2px solid #ef4444;
-      box-shadow: 0 0 0 2px rgba(239,68,68,0.25), 0 2px 10px rgba(239,68,68,0.3);
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.3), 0 2px 10px rgba(239,68,68,0.3);
     }
     .outs-none { color: var(--text-3); font-size: 13px; font-style: italic; padding-top: 10px; }
 
-
-    /* ═══════════════════════════════════
-       패 랭킹 테이블
-    ═══════════════════════════════════ */
+    /* ── 패 랭킹 ── */
     .rank-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -217,189 +284,175 @@
     }
     .rank-card {
       background: var(--bg-surface);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-g);
       border-radius: var(--radius-md);
-      padding: 16px 18px;
+      padding: 18px 20px;
       display: flex; flex-direction: column; gap: 12px;
       transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative; overflow: hidden;
     }
-    .rank-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(74,222,128,0.08); }
-    .rank-card[data-tier="gold"]   { border-color: rgba(250,204,21,0.45); }
-    .rank-card[data-tier="silver"] { border-color: rgba(148,163,184,0.45); }
-    .rank-card[data-tier="bronze"] { border-color: rgba(251,146,60,0.45); }
+    .rank-card::after {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 60px; height: 60px;
+      background: radial-gradient(circle at top right, rgba(212,175,55,0.06), transparent 70%);
+    }
+    .rank-card:hover { border-color: rgba(212,175,55,0.45); box-shadow: 0 4px 24px rgba(212,175,55,0.08); }
+    .rank-card[data-tier="gold"]   { border-color: rgba(212,175,55,0.4); }
+    .rank-card[data-tier="silver"] { border-color: rgba(148,163,184,0.35); }
+    .rank-card[data-tier="bronze"] { border-color: rgba(180,100,60,0.35); }
     .rank-card-top { display: flex; align-items: center; gap: 10px; }
     .rank-num {
       width: 28px; height: 28px; border-radius: 50%;
-      background: var(--bg-card);
-      color: var(--accent); font-size: 12px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: background 0.2s, color 0.2s;
+      background: rgba(212,175,55,0.1); border: 1px solid var(--border-g);
+      color: var(--gold); font-size: 11px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .rank-card[data-tier="gold"]   .rank-num { background: rgba(250,204,21,0.15); color: #facc15; }
-    .rank-card[data-tier="silver"] .rank-num { background: rgba(148,163,184,0.15); color: #94a3b8; }
-    .rank-card[data-tier="bronze"] .rank-num { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .rank-card[data-tier="gold"]   .rank-num { background: rgba(212,175,55,0.18); color: var(--gold-l); border-color: rgba(212,175,55,0.4); }
+    .rank-card[data-tier="silver"] .rank-num { background: rgba(148,163,184,0.15); color: #94a3b8; border-color: rgba(148,163,184,0.3); }
+    .rank-card[data-tier="bronze"] .rank-num { background: rgba(180,100,60,0.15);  color: #c4763c; border-color: rgba(180,100,60,0.3); }
     .rank-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
     .rank-cards-row { display: flex; gap: 5px; flex-wrap: wrap; }
-    .rank-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+    .rank-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; }
 
-    /* ═══════════════════════════════════
-       전략 카드
-    ═══════════════════════════════════ */
+    /* ── 전략 카드 ── */
     .strategy-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
     }
     .strategy-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
+      background: var(--bg-surface); border: 1px solid var(--border-g);
+      border-radius: var(--radius-lg); padding: 26px;
+      transition: border-color 0.2s, transform 0.2s;
     }
-    .strategy-icon {
-      font-size: 30px; margin-bottom: 12px;
-      display: block;
-    }
-    .strategy-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-    .strategy-card p  { font-size: 14px; color: var(--text-2); line-height: 1.7; }
-    .strategy-card ul { font-size: 14px; color: var(--text-2); padding-left: 18px; line-height: 2; }
+    .strategy-card:hover { border-color: rgba(212,175,55,0.4); transform: translateY(-2px); }
+    .strategy-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+    .strategy-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text-1); }
+    .strategy-card p  { font-size: 13.5px; color: var(--text-2); line-height: 1.75; }
+    .strategy-card ul { font-size: 13.5px; color: var(--text-2); padding-left: 18px; line-height: 2.1; }
     .tip-box {
-      background: rgba(74,222,128,0.08);
-      border-left: 3px solid var(--accent);
+      background: rgba(212,175,55,0.07); border-left: 2px solid var(--gold);
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      padding: 10px 14px; margin-top: 12px;
+      padding: 10px 14px; margin-top: 14px;
       font-size: 13px; color: var(--text-2);
     }
-    .tip-box strong { color: var(--accent); }
+    .tip-box strong { color: var(--gold); }
 
-    /* ═══════════════════════════════════
-       자주 묻는 질문
-    ═══════════════════════════════════ */
-    .faq-list { display: flex; flex-direction: column; gap: 12px; max-width: 760px; margin: 0 auto; }
+    /* ── FAQ ── */
+    .faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 760px; margin: 0 auto; }
     .faq-item {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
+      background: var(--bg-surface); border: 1px solid var(--border-g);
+      border-radius: var(--radius-md); overflow: hidden;
+      transition: border-color 0.2s;
     }
+    .faq-item:hover { border-color: rgba(212,175,55,0.35); }
     .faq-q {
       width: 100%; background: none; border: none;
-      padding: 16px 20px; text-align: left;
-      font-size: 15px; font-weight: 600; color: var(--text-1);
-      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-      gap: 12px;
+      padding: 17px 20px; text-align: left;
+      font-size: 14.5px; font-weight: 600; color: var(--text-1);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px;
     }
-    .faq-q:hover { color: var(--accent); }
-    .faq-q .arrow { transition: transform 0.2s; font-size: 12px; color: var(--text-3); flex-shrink: 0; }
-    .faq-q.open .arrow { transform: rotate(180deg); }
+    .faq-q:hover { color: var(--gold); }
+    .faq-q .arrow { transition: transform 0.2s; font-size: 11px; color: var(--gold-d); flex-shrink: 0; }
+    .faq-q.open .arrow { transform: rotate(180deg); color: var(--gold); }
     .faq-a {
       padding: 0 20px; max-height: 0; overflow: hidden;
       transition: max-height 0.3s ease, padding 0.3s;
-      font-size: 14px; color: var(--text-2); line-height: 1.75;
+      font-size: 14px; color: var(--text-2); line-height: 1.8;
     }
     .faq-a.open { max-height: 300px; padding: 0 20px 16px; }
 
-    /* ═══════════════════════════════════
-       소개 섹션
-    ═══════════════════════════════════ */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px; align-items: center;
-    }
+    /* ── 소개 ── */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
     @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
-    .about-text h2 { font-size: 26px; font-weight: 800; margin-bottom: 14px; }
-    .about-text h2 em { color: var(--accent); font-style: normal; }
-    .about-text p { font-size: 15px; color: var(--text-2); margin-bottom: 12px; }
+    .about-text h2 { font-size: 26px; font-weight: 900; margin-bottom: 14px; letter-spacing: -0.5px; }
+    .about-text h2 .g {
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .about-text p { font-size: 14.5px; color: var(--text-2); margin-bottom: 12px; line-height: 1.8; }
     .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
     .feature-list li {
       display: flex; align-items: flex-start; gap: 10px;
       font-size: 14px; color: var(--text-2);
     }
-    .feature-list li::before {
-      content: "✓"; color: var(--accent); font-weight: 800;
-      flex-shrink: 0; margin-top: 2px;
-    }
+    .feature-list li::before { content: "✦"; color: var(--gold); font-size: 10px; flex-shrink: 0; margin-top: 5px; }
     .about-visual {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px; text-align: center;
+      background: var(--bg-surface); border: 1px solid var(--border-g);
+      border-radius: var(--radius-lg); padding: 30px;
     }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .stat-item {
-      background: var(--bg-deep);
-      border-radius: var(--radius-md);
-      padding: 18px; text-align: center;
+      background: var(--bg-deep); border: 1px solid var(--border-g);
+      border-radius: var(--radius-md); padding: 20px; text-align: center;
     }
-    .stat-item strong { display: block; font-size: 28px; font-weight: 800; color: var(--accent); }
-    .stat-item span { font-size: 12px; color: var(--text-3); }
+    .stat-item strong {
+      display: block; font-size: 30px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--gold-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-item span { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* ═══════════════════════════════════
-       개인정보처리방침
-    ═══════════════════════════════════ */
+    /* ── 개인정보처리방침 ── */
     .privacy-content {
       max-width: 760px; margin: 0 auto;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 36px 40px;
+      background: var(--bg-surface); border: 1px solid var(--border-g);
+      border-radius: var(--radius-lg); padding: 36px 40px;
     }
     @media (max-width: 600px) { .privacy-content { padding: 24px 20px; } }
-    .privacy-content h3 { font-size: 17px; font-weight: 700; margin: 24px 0 8px; color: var(--accent); }
+    .privacy-content h3 { font-size: 16px; font-weight: 700; margin: 24px 0 8px; color: var(--gold); }
     .privacy-content h3:first-child { margin-top: 0; }
     .privacy-content p  { font-size: 14px; color: var(--text-2); line-height: 1.8; margin-bottom: 8px; }
     .privacy-content ul { font-size: 14px; color: var(--text-2); padding-left: 20px; line-height: 2; }
 
-    /* ═══════════════════════════════════
-       푸터
-    ═══════════════════════════════════ */
+    /* ── 푸터 ── */
     .footer {
       background: var(--bg-surface);
-      border-top: 1px solid var(--border);
-      padding: 40px 24px 28px;
+      border-top: 1px solid var(--border-g);
+      padding: 48px 24px 28px;
     }
     .footer-inner {
       max-width: 1100px; margin: 0 auto;
-      display: grid; grid-template-columns: 2fr 1fr 1fr;
-      gap: 32px;
+      display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 36px;
     }
     @media (max-width: 640px) { .footer-inner { grid-template-columns: 1fr; } }
-    .footer-brand h4 { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
-    .footer-brand h4 span { color: var(--accent); }
-    .footer-brand p { font-size: 13px; color: var(--text-3); line-height: 1.7; }
-    .footer-col h5 { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .footer-brand h4 { font-size: 18px; font-weight: 900; margin-bottom: 10px; }
+    .footer-brand h4 span { color: var(--gold); }
+    .footer-brand p { font-size: 13px; color: var(--text-3); line-height: 1.8; }
+    .footer-col h5 {
+      font-size: 11px; font-weight: 800; color: var(--gold-d);
+      margin-bottom: 14px; text-transform: uppercase; letter-spacing: 2px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
     .footer-col ul li a { font-size: 13px; color: var(--text-3); transition: color 0.15s; }
-    .footer-col ul li a:hover { color: var(--accent); text-decoration: none; }
+    .footer-col ul li a:hover { color: var(--gold); text-decoration: none; }
     .footer-bottom {
       max-width: 1100px; margin: 28px auto 0;
-      padding-top: 20px; border-top: 1px solid var(--border);
+      padding-top: 20px; border-top: 1px solid var(--border-g);
       display: flex; justify-content: space-between; align-items: center;
       font-size: 12px; color: var(--text-3); flex-wrap: wrap; gap: 8px;
     }
+    .footer-bottom a { color: var(--text-3); }
+    .footer-bottom a:hover { color: var(--gold); }
 
-    /* ═══════════════════════════════════
-       반응형
-    ═══════════════════════════════════ */
+    /* ── 반응형 ── */
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .hero { padding: 40px 20px 36px; }
+      .hero { padding: 60px 20px 52px; }
+      .hero-divider { display: none; }
     }
     @media (max-width: 480px) {
-      .section { padding: 44px 16px; }
+      .section { padding: 52px 16px; }
       .rank-grid, .strategy-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════ 내비게이션 ══════════ -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">홀덤 <span>분석기</span></a>
     <ul class="nav-links">
-      <li><a href="game.html">핸드 분석기</a></li>
+      <li><a href="game.html">핸드 연습</a></li>
       <li><a href="odds.html">확률 계산기</a></li>
       <li><a href="#rules">패 랭킹</a></li>
       <li><a href="#strategy">전략 가이드</a></li>
@@ -407,34 +460,69 @@
       <li><a href="#about">소개</a></li>
       <li><a href="#privacy">개인정보처리방침</a></li>
     </ul>
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀️ 라이트 모드</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀ 라이트</button>
   </div>
 </nav>
 
-<!-- ══════════ 히어로 ══════════ -->
+<!-- 히어로 -->
 <section class="hero" id="home">
-  <div class="container">
-    <div class="hero-badge">무료 포커 연습 도구</div>
-    <h1><em>홀덤</em> 핸드 분석기</h1>
-    <p>내 패의 승률과 아웃츠를 실시간으로 계산하고, 플랍·턴·리버를 단계별로 연습하세요. 포커 실력 향상을 위한 최고의 무료 도구입니다.</p>
+  <div class="hero-suits" aria-hidden="true">
+    <span class="suit-float">♠</span>
+    <span class="suit-float">♥</span>
+    <span class="suit-float">♦</span>
+    <span class="suit-float">♣</span>
+    <span class="suit-float">♠</span>
+    <span class="suit-float">♥</span>
+  </div>
+  <div class="container" style="position:relative;z-index:1">
+    <div class="hero-badge">✦ 무료 포커 분석 도구 ✦</div>
+    <h1>당신의 <span class="g">홀덤 실력</span>을<br>한 단계 끌어올리세요</h1>
+    <p>내 패의 승률과 아웃츠를 실시간으로 계산하고,<br>플랍·턴·리버를 단계별로 연습하세요.</p>
     <div class="hero-btns">
-      <a href="game.html" class="btn-primary" style="display:inline-flex;align-items:center;text-decoration:none;">🎮 핸드 연습하기</a>
-      <a href="odds.html" class="btn-secondary" style="display:inline-flex;align-items:center;text-decoration:none;">🧮 확률 계산기</a>
+      <a href="game.html" class="btn-gold">🎮 핸드 연습하기</a>
+      <a href="odds.html" class="btn-outline-gold">🧮 확률 계산기</a>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><strong>10가지</strong><span>패 조합 분석</span></div>
+      <div class="hero-stat"><strong>10</strong><span>패 조합 분석</span></div>
+      <div class="hero-divider"></div>
       <div class="hero-stat"><strong>실시간</strong><span>승률 계산</span></div>
-      <div class="hero-stat"><strong>무료</strong><span>제한 없이 연습</span></div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat"><strong>무료</strong><span>제한 없음</span></div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat"><strong>1500+</strong><span>시뮬레이션</span></div>
     </div>
   </div>
 </section>
 
+<!-- 기능 카드 -->
+<section class="features-section">
+  <div class="features-grid">
+    <a href="game.html" class="feature-card">
+      <div class="feature-icon">🎮</div>
+      <h3>헤즈업 핸드 연습</h3>
+      <p>랜덤 상대 기준 실시간 승률 계산. 콜·폴드 판단을 반복 연습하세요.</p>
+      <span class="feature-tag">바로가기 →</span>
+    </a>
+    <a href="odds.html" class="feature-card">
+      <div class="feature-icon">🧮</div>
+      <h3>홀덤 확률 계산기</h3>
+      <p>원하는 카드를 직접 선택해 정확한 승률과 아웃츠를 계산합니다.</p>
+      <span class="feature-tag">바로가기 →</span>
+    </a>
+    <a href="#strategy" class="feature-card">
+      <div class="feature-icon">📖</div>
+      <h3>포커 전략 가이드</h3>
+      <p>스타팅 핸드, 포지션, 아웃츠, 블러프까지 핵심 전략을 정리했습니다.</p>
+      <span class="feature-tag">바로가기 →</span>
+    </a>
+  </div>
+</section>
 
-<!-- ══════════ 패 랭킹 ══════════ -->
+<!-- 패 랭킹 -->
 <section id="rules" class="section section-alt">
   <div class="container-lg">
     <div class="section-head">
-      <h2>홀덤 <em>패 랭킹</em></h2>
+      <h2>홀덤 <span class="g">패 랭킹</span></h2>
       <p>강한 패부터 약한 패 순서로 정리한 10가지 핸드 조합입니다.</p>
       <div class="divider"></div>
     </div>
@@ -442,11 +530,11 @@
   </div>
 </section>
 
-<!-- ══════════ 전략 가이드 ══════════ -->
+<!-- 전략 가이드 -->
 <section id="strategy" class="section">
   <div class="container-lg">
     <div class="section-head">
-      <h2>포커 <em>전략 가이드</em></h2>
+      <h2>포커 <span class="g">전략 가이드</span></h2>
       <p>승률을 높이기 위한 핵심 전략을 알아보세요.</p>
       <div class="divider"></div>
     </div>
@@ -521,11 +609,11 @@
   </div>
 </section>
 
-<!-- ══════════ FAQ ══════════ -->
+<!-- FAQ -->
 <section id="faq" class="section section-alt">
   <div class="container">
     <div class="section-head">
-      <h2>자주 묻는 <em>질문</em></h2>
+      <h2>자주 묻는 <span class="g">질문</span></h2>
       <p>홀덤 연습에 관해 궁금한 점을 모았습니다.</p>
       <div class="divider"></div>
     </div>
@@ -554,19 +642,19 @@
   </div>
 </section>
 
-<!-- ══════════ 소개 ══════════ -->
+<!-- 소개 -->
 <section id="about" class="section">
   <div class="container">
     <div class="about-grid">
       <div class="about-text">
-        <h2>홀덤 <em>분석기</em>란?</h2>
+        <h2>홀덤 <span class="g">분석기</span>란?</h2>
         <p>홀덤 분석기는 홀덤 포커를 배우고 연습하려는 모든 분들을 위해 만든 무료 핸드 분석 도구입니다.</p>
         <p>복잡한 가입 절차나 설치 없이 브라우저에서 바로 사용할 수 있으며, 실시간 승률 계산과 아웃츠 분석으로 포커 실력 향상을 돕습니다.</p>
         <ul class="feature-list">
           <li>몬테카를로 시뮬레이션 기반 정확한 승률 계산</li>
           <li>플랍·턴·리버 단계별 아웃츠 실시간 분석</li>
           <li>10가지 패 조합 자동 인식 및 표시</li>
-          <li>완전 무료, 광고 없는 깔끔한 인터페이스</li>
+          <li>완전 무료, 제한 없는 연습</li>
           <li>다크/라이트 모드 지원</li>
         </ul>
       </div>
@@ -582,21 +670,19 @@
   </div>
 </section>
 
-<!-- ══════════ 개인정보처리방침 ══════════ -->
+<!-- 개인정보처리방침 -->
 <section id="privacy" class="section section-alt">
   <div class="container">
     <div class="section-head">
-      <h2><em>개인정보</em>처리방침</h2>
+      <h2><span class="g">개인정보</span>처리방침</h2>
       <p>최종 수정일: 2025년 5월 6일</p>
       <div class="divider"></div>
     </div>
     <div class="privacy-content">
       <h3>1. 개인정보 수집 안내</h3>
       <p>홀덤 분석기(이하 "본 사이트")는 별도의 회원가입이나 개인정보를 수집하지 않습니다. 모든 게임 데이터는 사용자의 브라우저 내에서만 처리되며 서버로 전송되지 않습니다.</p>
-
       <h3>2. 쿠키 및 로컬 스토리지 사용</h3>
       <p>본 사이트는 사용자의 테마(다크/라이트 모드) 설정을 기억하기 위해 브라우저의 로컬 스토리지(localStorage)를 사용합니다. 이는 사용자의 편의를 위한 것으로, 개인 식별 정보를 포함하지 않습니다.</p>
-
       <h3>3. Google AdSense 및 제3자 광고</h3>
       <p>본 사이트는 Google AdSense를 통해 광고를 게재할 수 있습니다. Google은 광고 서비스 제공을 위해 쿠키를 사용합니다.</p>
       <ul>
@@ -604,20 +690,16 @@
         <li>사용자는 Google 광고 설정 페이지에서 맞춤 광고를 비활성화할 수 있습니다.</li>
         <li>자세한 내용은 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google 개인정보처리방침</a>을 참고하세요.</li>
       </ul>
-
       <h3>4. 제3자 서비스</h3>
       <p>본 사이트는 아래와 같은 제3자 서비스를 사용할 수 있으며, 각 서비스의 개인정보처리방침이 적용됩니다.</p>
       <ul>
         <li>Google AdSense (광고 서비스)</li>
         <li>Google Analytics (방문자 통계, 선택적 적용)</li>
       </ul>
-
       <h3>5. 아동 개인정보 보호</h3>
       <p>본 사이트는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.</p>
-
       <h3>6. 개인정보처리방침 변경</h3>
       <p>본 방침은 법령 변경, 서비스 변경 등에 따라 업데이트될 수 있습니다. 변경 시 본 페이지에 최신 내용을 공지합니다.</p>
-
       <h3>7. 문의</h3>
       <p>개인정보 관련 문의 사항은 아래 이메일로 연락해주시기 바랍니다.</p>
       <p>이메일: <a href="mailto:km941231@gmail.com">km941231@gmail.com</a></p>
@@ -625,7 +707,7 @@
   </div>
 </section>
 
-<!-- ══════════ 푸터 ══════════ -->
+<!-- 푸터 -->
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-brand">
@@ -635,15 +717,16 @@
     <div class="footer-col">
       <h5>바로가기</h5>
       <ul>
-        <li><a href="game.html">핸드 분석기</a></li>
+        <li><a href="game.html">핸드 연습</a></li>
+        <li><a href="odds.html">확률 계산기</a></li>
         <li><a href="#rules">패 랭킹</a></li>
         <li><a href="#strategy">전략 가이드</a></li>
-        <li><a href="#faq">FAQ</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h5>정보</h5>
       <ul>
+        <li><a href="#faq">FAQ</a></li>
         <li><a href="#about">사이트 소개</a></li>
         <li><a href="#privacy">개인정보처리방침</a></li>
         <li><a href="mailto:km941231@gmail.com">문의하기</a></li>
@@ -656,16 +739,14 @@
   </div>
 </footer>
 
-<!-- ══════════ JavaScript ══════════ -->
 <script>
 'use strict';
 
-/* ─── 테마 ─── */
 (function() {
   const saved = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = saved === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+  if (btn) btn.textContent = saved === 'dark' ? '☀ 라이트' : '🌙 다크';
 })();
 
 function toggleTheme() {
@@ -673,10 +754,9 @@ function toggleTheme() {
   const next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('theme', next);
-  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀ 라이트' : '🌙 다크';
 }
 
-/* ─── FAQ ─── */
 function toggleFaq(btn) {
   const ans = btn.nextElementSibling;
   const open = ans.classList.contains('open');
@@ -685,32 +765,29 @@ function toggleFaq(btn) {
   if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
 }
 
-/* ─── 패 랭킹 데이터 ─── */
 const RANK_DATA = [
-  {num:1,  tier:'gold',   name:'로얄 플러시',    desc:'같은 무늬의 A·K·Q·J·10. 포커 최강 패.',          hi:[0,1,2,3,4],
+  {num:1,  tier:'gold',   name:'로얄 플러시',      desc:'같은 무늬의 A·K·Q·J·10. 포커 최강 패.',           hi:[0,1,2,3,4],
    cards:[{value:'A',suit:'♠'},{value:'K',suit:'♠'},{value:'Q',suit:'♠'},{value:'J',suit:'♠'},{value:'T',suit:'♠'}]},
-  {num:2,  tier:'silver', name:'스트레이트 플러시', desc:'같은 무늬의 연속된 5장. 로얄 플러시 제외 최강.', hi:[0,1,2,3,4],
+  {num:2,  tier:'silver', name:'스트레이트 플러시', desc:'같은 무늬의 연속된 5장. 로얄 플러시 제외 최강.',    hi:[0,1,2,3,4],
    cards:[{value:'9',suit:'♥'},{value:'8',suit:'♥'},{value:'7',suit:'♥'},{value:'6',suit:'♥'},{value:'5',suit:'♥'}]},
-  {num:3,  tier:'bronze', name:'포카드',          desc:'같은 숫자 4장. 매우 희귀하고 강력한 패.',          hi:[0,1,2,3],
+  {num:3,  tier:'bronze', name:'포카드',            desc:'같은 숫자 4장. 매우 희귀하고 강력한 패.',           hi:[0,1,2,3],
    cards:[{value:'K',suit:'♠'},{value:'K',suit:'♥'},{value:'K',suit:'♦'},{value:'K',suit:'♣'},{value:'3',suit:'♠'}]},
-  {num:4,  tier:'',       name:'풀하우스',         desc:'트리플(빨간박스) + 페어(빨간박스) 조합.',          hi:[0,1,2,3,4],
+  {num:4,  tier:'',       name:'풀하우스',           desc:'트리플(빨간박스) + 페어(빨간박스) 조합.',           hi:[0,1,2,3,4],
    cards:[{value:'Q',suit:'♠'},{value:'Q',suit:'♥'},{value:'Q',suit:'♦'},{value:'7',suit:'♠'},{value:'7',suit:'♥'}]},
-  {num:5,  tier:'',       name:'플러시',           desc:'같은 무늬 5장. 연속될 필요 없음.',                 hi:[0,1,2,3,4],
+  {num:5,  tier:'',       name:'플러시',             desc:'같은 무늬 5장. 연속될 필요 없음.',                  hi:[0,1,2,3,4],
    cards:[{value:'A',suit:'♣'},{value:'J',suit:'♣'},{value:'8',suit:'♣'},{value:'5',suit:'♣'},{value:'2',suit:'♣'}]},
-  {num:6,  tier:'',       name:'스트레이트',        desc:'연속된 숫자 5장. 무늬 무관.',                      hi:[0,1,2,3,4],
+  {num:6,  tier:'',       name:'스트레이트',          desc:'연속된 숫자 5장. 무늬 무관.',                       hi:[0,1,2,3,4],
    cards:[{value:'9',suit:'♠'},{value:'8',suit:'♥'},{value:'7',suit:'♦'},{value:'6',suit:'♣'},{value:'5',suit:'♠'}]},
-  {num:7,  tier:'',       name:'트리플',           desc:'같은 숫자 3장(빨간박스). 나머지는 키커.',           hi:[0,1,2],
+  {num:7,  tier:'',       name:'트리플',             desc:'같은 숫자 3장(빨간박스). 나머지는 키커.',            hi:[0,1,2],
    cards:[{value:'J',suit:'♠'},{value:'J',suit:'♥'},{value:'J',suit:'♦'},{value:'A',suit:'♣'},{value:'4',suit:'♠'}]},
-  {num:8,  tier:'',       name:'투페어',           desc:'페어 2세트(빨간박스). 나머지 1장은 키커.',          hi:[0,1,2,3],
+  {num:8,  tier:'',       name:'투페어',             desc:'페어 2세트(빨간박스). 나머지 1장은 키커.',           hi:[0,1,2,3],
    cards:[{value:'T',suit:'♠'},{value:'T',suit:'♥'},{value:'6',suit:'♦'},{value:'6',suit:'♣'},{value:'K',suit:'♠'}]},
-  {num:9,  tier:'',       name:'원페어',           desc:'같은 숫자 2장(빨간박스). 나머지 3장은 키커.',       hi:[0,1],
+  {num:9,  tier:'',       name:'원페어',             desc:'같은 숫자 2장(빨간박스). 나머지 3장은 키커.',        hi:[0,1],
    cards:[{value:'A',suit:'♠'},{value:'A',suit:'♥'},{value:'K',suit:'♦'},{value:'9',suit:'♣'},{value:'3',suit:'♠'}]},
-  {num:10, tier:'',       name:'하이카드',          desc:'가장 높은 카드(빨간박스) 하나로만 비교.',           hi:[0],
+  {num:10, tier:'',       name:'하이카드',            desc:'가장 높은 카드(빨간박스) 하나로만 비교.',            hi:[0],
    cards:[{value:'A',suit:'♠'},{value:'J',suit:'♦'},{value:'9',suit:'♣'},{value:'6',suit:'♥'},{value:'2',suit:'♠'}]},
 ];
 
-
-/* ─── 미니 카드 (랭킹용) ─── */
 function makeMiniCard(c) {
   const el=document.createElement('div');
   const red=c.suit==='♥'||c.suit==='♦';
@@ -720,7 +797,6 @@ function makeMiniCard(c) {
   return el;
 }
 
-/* ─── 패 랭킹 렌더 ─── */
 function initRankings() {
   const grid=document.getElementById('rank-grid');
   for (const r of RANK_DATA) {
@@ -737,7 +813,6 @@ function initRankings() {
     r.cards.forEach((c,i)=>{ const mc=makeMiniCard(c); if(r.hi.includes(i)) mc.classList.add('highlighted'); row.appendChild(mc); });
 
     const desc=document.createElement('p'); desc.className='rank-desc'; desc.textContent=r.desc;
-
     card.appendChild(top); card.appendChild(row); card.appendChild(desc);
     grid.appendChild(card);
   }
