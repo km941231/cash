@@ -152,7 +152,7 @@
       letter-spacing: 1.5px; margin-bottom: 10px;
     }
     .cards-row {
-      display: flex; justify-content: center; gap: 8px;
+      display: flex; justify-content: center; gap: 6px;
       min-height: 92px; align-items: center; flex-wrap: wrap;
     }
 
@@ -246,9 +246,17 @@
     .mini-card.black { color: #111827; }
     .outs-none { color: var(--text-3); font-size: 13px; font-style: italic; padding-top: 10px; }
 
-    /* 내 패 */
-    .player-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 14px; }
-    .hand-name { font-size: 16px; font-weight: 700; color: var(--warn); min-height: 22px; }
+    /* 내 패 + 상대방 패 나란히 */
+    .hands-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 14px; justify-content: center;
+    }
+    .hand-side { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+    .vs-badge {
+      font-size: 11px; font-weight: 800; color: var(--text-3);
+      padding-top: 32px; flex-shrink: 0; letter-spacing: 1px;
+    }
+    .hand-name { font-size: 14px; font-weight: 700; color: var(--warn); min-height: 20px; text-align: center; }
 
     /* 액션 버튼 */
     .action-row { display: flex; gap: 10px; margin-bottom: 12px; }
@@ -264,19 +272,7 @@
     .gbtn-new   { background: var(--bg-deep); color: var(--text-1); border: 1px solid var(--border); }
     .gbtn-new:hover:not(:disabled)  { background: var(--bg-card); }
 
-    /* 상대방 */
-    .opponent-box { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 14px; }
-    .opp-hand-name { font-size: 13px; font-weight: 700; color: var(--text-3); min-height: 18px; }
-
-    /* 구분선 */
-    .vs-divider {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 14px; color: var(--text-3); font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1.5px;
-    }
-    .vs-divider::before, .vs-divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
+    .opp-hand-name { font-size: 14px; font-weight: 700; color: var(--text-3); min-height: 20px; text-align: center; }
 
     /* 결과 */
     .result-box {
@@ -348,11 +344,6 @@
       <p>랜덤 상대 1명 기준 승률 계산</p>
     </div>
     <div id="stage-bar" class="stage-bar" style="margin-bottom:16px"></div>
-    <div class="opponent-box">
-      <div class="box-lbl">상대방 패</div>
-      <div id="opponent-cards" class="cards-row"></div>
-      <div id="opp-hand-name" class="opp-hand-name"></div>
-    </div>
     <div class="community-box">
       <div class="box-lbl">커뮤니티 카드</div>
       <div id="community-cards" class="cards-row"></div>
@@ -380,10 +371,18 @@
         <div id="outs-inner" class="outs-body-inner"></div>
       </div>
     </div>
-    <div class="vs-divider">내 패</div>
-    <div class="player-box">
-      <div id="player-cards" class="cards-row"></div>
-      <div id="hand-name" class="hand-name"></div>
+    <div class="hands-row">
+      <div class="hand-side">
+        <div class="box-lbl">내 패</div>
+        <div id="player-cards" class="cards-row"></div>
+        <div id="hand-name" class="hand-name"></div>
+      </div>
+      <div id="vs-badge" class="vs-badge" style="display:none">VS</div>
+      <div id="opp-hand-side" class="hand-side" style="display:none">
+        <div class="box-lbl">상대방</div>
+        <div id="opponent-cards" class="cards-row"></div>
+        <div id="opp-hand-name" class="opp-hand-name"></div>
+      </div>
     </div>
     <div id="action-area" class="action-row"></div>
     <div id="result-area" class="result-box"></div>
@@ -562,15 +561,16 @@ function makeCard(c) {
 function makeCardBack() { const el=document.createElement('div'); el.className='card-back'; return el; }
 
 function renderOpponent() {
-  const area=document.getElementById('opponent-cards'); area.innerHTML='';
   const reveal=gs.phase==='DONE'||gs.phase==='FOLD';
-  if (gs.phase==='IDLE'||!gs.oppHole.length) {
-    area.appendChild(makeCardBack()); area.appendChild(makeCardBack());
-  } else {
-    for (const c of gs.oppHole) area.appendChild(reveal?makeCard(c):makeCardBack());
-  }
+  const side=document.getElementById('opp-hand-side');
+  const badge=document.getElementById('vs-badge');
+  side.style.display=reveal?'':'none';
+  badge.style.display=reveal?'':'none';
+  if (!reveal) return;
+  const area=document.getElementById('opponent-cards'); area.innerHTML='';
+  for (const c of gs.oppHole) area.appendChild(makeCard(c));
   const hn=document.getElementById('opp-hand-name');
-  if (reveal&&gs.oppHole.length===2&&gs.comm.length===5) {
+  if (gs.oppHole.length===2&&gs.comm.length===5) {
     const b=bestHand([...gs.oppHole,...gs.comm]);
     hn.textContent=b?HAND_NAMES[b.rank]:'';
   } else { hn.textContent=''; }
