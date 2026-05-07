@@ -433,9 +433,27 @@
     .footer-bottom a { color: var(--text-3); }
     .footer-bottom a:hover { color: var(--gold); }
 
+    /* ── 햄버거 메뉴 ── */
+    .menu-btn {
+      display: none; background: transparent; border: 1px solid var(--border-g);
+      color: var(--text-2); border-radius: var(--radius-sm);
+      padding: 6px 12px; font-size: 20px; cursor: pointer;
+      transition: all 0.15s; line-height: 1;
+    }
+    .menu-btn:hover { border-color: var(--gold); color: var(--gold); }
+
     /* ── 반응형 ── */
     @media (max-width: 768px) {
       .nav-links { display: none; }
+      .nav-links.open {
+        display: flex; flex-direction: column;
+        position: fixed; top: 62px; left: 0; right: 0;
+        background: var(--nav-bg); backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-g);
+        padding: 12px 24px 18px; gap: 2px; z-index: 99;
+      }
+      .nav-links.open a { padding: 10px 12px; font-size: 15px; }
+      .menu-btn { display: block; }
       .hero { padding: 60px 20px 52px; }
       .hero-divider { display: none; }
     }
@@ -462,6 +480,7 @@
       <li><a href="#privacy">개인정보처리방침</a></li>
     </ul>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀ 라이트</button>
+    <button class="menu-btn" onclick="toggleMenu()" id="menu-btn">☰</button>
   </div>
 </nav>
 
@@ -751,6 +770,11 @@
   if (btn) btn.textContent = saved === 'dark' ? '☀ 라이트' : '🌙 다크';
 })();
 
+function toggleMenu() {
+  const links = document.querySelector('.nav-links');
+  links.classList.toggle('open');
+  document.getElementById('menu-btn').textContent = links.classList.contains('open') ? '✕' : '☰';
+}
 function toggleTheme() {
   const cur  = document.documentElement.getAttribute('data-theme');
   const next = cur === 'dark' ? 'light' : 'dark';
