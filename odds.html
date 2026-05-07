@@ -8,41 +8,49 @@
   <title>확률 계산기 | 홀덤 분석기</title>
   <style>
     :root {
-      --bg-base:    #1a1a2e;
-      --bg-surface: #16213e;
-      --bg-deep:    #0a2540;
-      --bg-card:    #0f3460;
-      --accent:     #4ade80;
-      --accent2:    #22c55e;
-      --danger:     #e94560;
-      --warn:       #fbbf24;
-      --info:       #90cdf4;
-      --text-1:     #e2e8f0;
-      --text-2:     #a0aec0;
-      --text-3:     #4a5568;
-      --border:     #1e4d8c;
-      --nav-bg:     rgba(22,33,62,0.97);
-      --shadow-lg:  0 20px 60px rgba(0,0,0,0.55);
+      --bg-base:    #0b0810;
+      --bg-surface: #130e1a;
+      --bg-deep:    #0e0a14;
+      --bg-card:    #1c1228;
+      --gold:       #d4af37;
+      --gold-l:     #f0d060;
+      --gold-d:     #8a6f20;
+      --accent:     #d4af37;
+      --accent2:    #b8960e;
+      --danger:     #e74c3c;
+      --warn:       #f39c12;
+      --info:       #5ab4f0;
+      --text-1:     #f0e6d0;
+      --text-2:     #a09080;
+      --text-3:     #504038;
+      --border:     #2a1e14;
+      --border-g:   rgba(212,175,55,0.22);
+      --nav-bg:     rgba(11,8,16,0.96);
+      --shadow-lg:  0 24px 64px rgba(0,0,0,0.75);
       --radius-lg:  20px;
       --radius-md:  12px;
       --radius-sm:  8px;
     }
     [data-theme="light"] {
-      --bg-base:    #f0f4f8;
+      --bg-base:    #f7f2ea;
       --bg-surface: #ffffff;
-      --bg-deep:    #e8f0fe;
-      --bg-card:    #dbeafe;
-      --accent:     #16a34a;
-      --accent2:    #15803d;
-      --danger:     #dc2626;
-      --warn:       #d97706;
-      --info:       #2563eb;
-      --text-1:     #1a202c;
-      --text-2:     #4a5568;
-      --text-3:     #9ca3af;
-      --border:     #bfdbfe;
-      --nav-bg:     rgba(255,255,255,0.97);
-      --shadow-lg:  0 20px 60px rgba(0,0,0,0.12);
+      --bg-deep:    #ede5d8;
+      --bg-card:    #e4d9c8;
+      --gold:       #9a7a10;
+      --gold-l:     #c4a020;
+      --gold-d:     #6a5408;
+      --accent:     #9a7a10;
+      --accent2:    #7a6010;
+      --danger:     #c03020;
+      --warn:       #a06000;
+      --info:       #1a60b0;
+      --text-1:     #1a1008;
+      --text-2:     #503828;
+      --text-3:     #9a8878;
+      --border:     #d0c0a8;
+      --border-g:   rgba(154,122,16,0.3);
+      --nav-bg:     rgba(247,242,234,0.97);
+      --shadow-lg:  0 24px 64px rgba(0,0,0,0.12);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,7 +68,7 @@
     .nav {
       position: sticky; top: 0; z-index: 100;
       background: var(--nav-bg); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border); padding: 0 24px;
+      border-bottom: 1px solid var(--border-g); padding: 0 24px;
     }
     .nav-inner {
       max-width: 1100px; margin: 0 auto;
@@ -82,7 +90,7 @@
       padding: 6px 14px; font-size: 13px; font-weight: 600;
       cursor: pointer; transition: all 0.15s; white-space: nowrap;
     }
-    .theme-btn:hover { background: var(--accent); color: #0d1f0d; border-color: var(--accent); }
+    .theme-btn:hover { background: var(--gold); color: #0b0810; border-color: var(--gold); }
 
     /* 게임 섹션 */
     .game-section {
@@ -92,7 +100,7 @@
     .game-wrap {
       background: var(--bg-surface); border-radius: var(--radius-lg);
       padding: 28px 24px; width: 100%; max-width: 520px;
-      box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg); border: 1px solid var(--border-g);
     }
     .game-header { text-align: center; margin-bottom: 22px; }
     .game-header h3 { font-size: 18px; font-weight: 700; }
@@ -116,17 +124,17 @@
 
     .card-slot {
       width: 62px; height: 90px;
-      border: 2px dashed var(--border);
+      border: 2px dashed var(--border-g);
       border-radius: 9px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       color: var(--text-3); font-size: 22px; font-weight: 300;
       transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
       flex-shrink: 0; position: relative; overflow: hidden;
     }
-    .card-slot:hover { border-color: var(--accent); background: rgba(74,222,128,0.04); color: var(--accent); }
+    .card-slot:hover { border-color: var(--gold); background: rgba(212,175,55,0.05); color: var(--gold); }
     .card-slot.active {
-      border-color: var(--accent); border-style: solid;
-      box-shadow: 0 0 0 3px rgba(74,222,128,0.22);
+      border-color: var(--gold); border-style: solid;
+      box-shadow: 0 0 0 3px rgba(212,175,55,0.2);
     }
     .card-slot.filled { border-color: transparent; padding: 0; }
     .card-slot.filled .card { animation: none; cursor: pointer; }
@@ -170,7 +178,7 @@
     .wr-sub { color: var(--text-3); font-size: 11px; text-align: right; min-height: 14px; }
 
     /* 아웃츠 */
-    .outs-box { background: var(--bg-deep); border-radius: var(--radius-md); padding: 12px 14px; border: 1px solid var(--border); margin-bottom: 14px; }
+    .outs-box { background: var(--bg-deep); border-radius: var(--radius-md); padding: 12px 14px; border: 1px solid var(--border-g); margin-bottom: 14px; }
     .outs-hd { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
     .outs-hd-left { display: flex; align-items: center; gap: 8px; }
     .outs-ttl { color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
@@ -198,13 +206,13 @@
     /* 카드 피커 */
     .picker-section {
       background: var(--bg-deep); border-radius: var(--radius-md);
-      padding: 14px 14px 12px; border: 1px solid var(--border); margin-bottom: 14px;
+      padding: 14px 14px 12px; border: 1px solid var(--border-g); margin-bottom: 14px;
     }
     .picker-header {
       display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
     }
     .picker-ttl { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
-    .picker-active-lbl { color: var(--accent); font-size: 12px; font-weight: 700; }
+    .picker-active-lbl { color: var(--gold); font-size: 12px; font-weight: 700; }
     .picker-grid { overflow-x: auto; padding-bottom: 4px; }
     .picker-suit-row { display: flex; align-items: center; gap: 3px; margin-bottom: 4px; min-width: 440px; }
     .suit-icon { width: 22px; font-size: 16px; text-align: center; flex-shrink: 0; line-height: 1; }
@@ -219,7 +227,7 @@
       transition: transform 0.1s, border-color 0.1s, opacity 0.15s;
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
-    .pc:hover:not(.used) { transform: scale(1.1); border-color: var(--accent); }
+    .pc:hover:not(.used) { transform: scale(1.1); border-color: var(--gold); }
     .pc:active:not(.used) { transform: scale(0.94); }
     .pc.used { opacity: 0.15; cursor: not-allowed; }
     .pc.red   { color: #e11d48; }
@@ -230,7 +238,7 @@
     /* 초기화 버튼 */
     .reset-btn {
       width: 100%; padding: 12px; border-radius: var(--radius-md);
-      font-size: 15px; font-weight: 700; border: 1px solid var(--border);
+      font-size: 15px; font-weight: 700; border: 1px solid var(--border-g);
       background: var(--bg-deep); color: var(--text-2); cursor: pointer;
       transition: background 0.12s, color 0.12s;
     }
@@ -245,7 +253,7 @@
       padding: 10px 18px; font-size: 14px; font-weight: 600;
       transition: border-color 0.15s, color 0.15s; text-decoration: none;
     }
-    .game-link-btn:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+    .game-link-btn:hover { border-color: var(--gold); color: var(--gold); text-decoration: none; }
 
     /* 푸터 */
     .footer { background: var(--bg-surface); border-top: 1px solid var(--border); padding: 20px 24px; text-align: center; font-size: 12px; color: var(--text-3); }
@@ -358,14 +366,14 @@
   const saved = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = saved === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+  if (btn) btn.textContent = saved === 'dark' ? '☀ 라이트' : '🌙 다크';
 })();
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
   const next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('theme', next);
-  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️ 라이트 모드' : '🌙 다크 모드';
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀ 라이트' : '🌙 다크';
 }
 
 /* ─── 상수 ─── */
