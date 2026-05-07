@@ -149,6 +149,14 @@
     }
     .btn-primary:hover { background: var(--accent2); }
     .btn-primary:active { transform: scale(0.97); }
+    .btn-secondary {
+      background: var(--bg-card); color: var(--info);
+      padding: 13px 28px; border-radius: var(--radius-md);
+      font-size: 16px; font-weight: 700; border: 1px solid var(--border); cursor: pointer;
+      transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    }
+    .btn-secondary:hover { background: #1a4f85; border-color: var(--info); }
+    .btn-secondary:active { transform: scale(0.97); }
     .btn-outline {
       background: transparent; color: var(--text-2);
       padding: 13px 28px; border-radius: var(--radius-md);
@@ -409,7 +417,8 @@
     <h1><em>홀덤</em> 핸드 분석기</h1>
     <p>내 패의 승률과 아웃츠를 실시간으로 계산하고, 플랍·턴·리버를 단계별로 연습하세요. 포커 실력 향상을 위한 최고의 무료 도구입니다.</p>
     <div class="hero-btns">
-      <a href="game.html" class="btn-primary" style="display:inline-flex;align-items:center;text-decoration:none;">지금 연습하기</a>
+      <a href="game.html" class="btn-primary" style="display:inline-flex;align-items:center;text-decoration:none;">🎮 핸드 연습하기</a>
+      <a href="odds.html" class="btn-secondary" style="display:inline-flex;align-items:center;text-decoration:none;">🧮 확률 계산기</a>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><strong>10가지</strong><span>패 조합 분석</span></div>
