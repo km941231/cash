@@ -474,14 +474,15 @@ function cmpH(a,b) {
 }
 
 /* ─── 몬테카를로 ─── */
-function monteCarlo(hole, opp, comm, n) {
-  const known=[...hole,...opp,...comm];
+function monteCarlo(hole, comm, n) {
+  const known=[...hole,...comm];
   const pool=createDeck().filter(c=>!known.some(k=>k.suit===c.suit&&k.rank===c.rank));
   const fill=5-comm.length;
   let win=0,tie=0;
   for (let i=0;i<n;i++) {
     shuffle(pool);
-    const more=pool.slice(0,fill);
+    const opp=pool.slice(0,2);
+    const more=pool.slice(2,2+fill);
     const full=[...comm,...more];
     const me=bestHand([...hole,...full]), op=bestHand([...opp,...full]);
     const c=cmpH(me,op);
@@ -546,7 +547,7 @@ function doFold() {
 function calcAsync(n) {
   const pct=document.getElementById('wr-pct'), fill=document.getElementById('wr-fill');
   pct.textContent='계산 중...'; pct.className='wr-pct calc'; fill.style.width='0%';
-  setTimeout(()=>{ const r=monteCarlo(gs.hole,gs.oppHole,gs.comm,n); gs.winRate=r.winRate; gs.tieRate=r.tieRate; renderWinRate(); },10);
+  setTimeout(()=>{ const r=monteCarlo(gs.hole,gs.comm,n); gs.winRate=r.winRate; gs.tieRate=r.tieRate; renderWinRate(); },10);
 }
 
 /* ─── 렌더 ─── */
