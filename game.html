@@ -264,6 +264,20 @@
     .gbtn-new   { background: var(--bg-deep); color: var(--text-1); border: 1px solid var(--border); }
     .gbtn-new:hover:not(:disabled)  { background: var(--bg-card); }
 
+    /* 상대방 */
+    .opponent-box { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 14px; }
+    .opp-hand-name { font-size: 13px; font-weight: 700; color: var(--text-3); min-height: 18px; }
+
+    /* 구분선 */
+    .vs-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; color: var(--text-3); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .vs-divider::before, .vs-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
     /* 결과 */
     .result-box {
       border-radius: var(--radius-md); padding: 13px 16px;
@@ -273,6 +287,8 @@
     }
     .result-box.vis { opacity: 1; }
     .res-done { background: rgba(74,222,128,0.12); color: var(--accent); }
+    .res-lose { background: rgba(233,69,96,0.12); color: var(--danger); }
+    .res-tie  { background: rgba(251,191,36,0.12); color: var(--warn); }
     .res-fold { background: rgba(160,174,192,0.07); color: var(--text-2); }
     .res-info { background: rgba(15,52,96,0.5); color: var(--info); }
 
@@ -332,6 +348,11 @@
       <p>랜덤 상대 1명 기준 승률 계산</p>
     </div>
     <div id="stage-bar" class="stage-bar" style="margin-bottom:16px"></div>
+    <div class="opponent-box">
+      <div class="box-lbl">상대방 패</div>
+      <div id="opponent-cards" class="cards-row"></div>
+      <div id="opp-hand-name" class="opp-hand-name"></div>
+    </div>
     <div class="community-box">
       <div class="box-lbl">커뮤니티 카드</div>
       <div id="community-cards" class="cards-row"></div>
@@ -359,8 +380,8 @@
         <div id="outs-inner" class="outs-body-inner"></div>
       </div>
     </div>
+    <div class="vs-divider">내 패</div>
     <div class="player-box">
-      <div class="box-lbl">내 패</div>
       <div id="player-cards" class="cards-row"></div>
       <div id="hand-name" class="hand-name"></div>
     </div>
@@ -454,14 +475,14 @@ function cmpH(a,b) {
 }
 
 /* ─── 몬테카를로 ─── */
-function monteCarlo(hole, comm, n) {
-  const known=[...hole,...comm];
+function monteCarlo(hole, opp, comm, n) {
+  const known=[...hole,...opp,...comm];
   const pool=createDeck().filter(c=>!known.some(k=>k.suit===c.suit&&k.rank===c.rank));
   const fill=5-comm.length;
   let win=0,tie=0;
   for (let i=0;i<n;i++) {
     shuffle(pool);
-    const opp=pool.slice(0,2), more=pool.slice(2,2+fill);
+    const more=pool.slice(0,fill);
     const full=[...comm,...more];
     const me=bestHand([...hole,...full]), op=bestHand([...opp,...full]);
     const c=cmpH(me,op);
@@ -499,10 +520,11 @@ function toggleOuts() {
 }
 
 /* ─── 게임 상태 ─── */
-const gs={phase:'IDLE',deck:[],hole:[],comm:[],winRate:0,tieRate:0};
+const gs={phase:'IDLE',deck:[],hole:[],oppHole:[],comm:[],winRate:0,tieRate:0};
 
 function startGame() {
-  gs.deck=shuffle(createDeck()); gs.hole=deal(gs.deck,2);
+  gs.deck=shuffle(createDeck());
+  gs.hole=deal(gs.deck,2); gs.oppHole=deal(gs.deck,2);
   gs.comm=[]; gs.winRate=0; gs.tieRate=0; gs.phase='PREFLOP';
   outsOpen=false;
   renderAll(); calcAsync(1500);
@@ -525,7 +547,7 @@ function doFold() {
 function calcAsync(n) {
   const pct=document.getElementById('wr-pct'), fill=document.getElementById('wr-fill');
   pct.textContent='계산 중...'; pct.className='wr-pct calc'; fill.style.width='0%';
-  setTimeout(()=>{ const r=monteCarlo(gs.hole,gs.comm,n); gs.winRate=r.winRate; gs.tieRate=r.tieRate; renderWinRate(); },10);
+  setTimeout(()=>{ const r=monteCarlo(gs.hole,gs.oppHole,gs.comm,n); gs.winRate=r.winRate; gs.tieRate=r.tieRate; renderWinRate(); },10);
 }
 
 /* ─── 렌더 ─── */
@@ -538,6 +560,22 @@ function makeCard(c) {
   return el;
 }
 function makeCardBack() { const el=document.createElement('div'); el.className='card-back'; return el; }
+
+function renderOpponent() {
+  const area=document.getElementById('opponent-cards'); area.innerHTML='';
+  const reveal=gs.phase==='DONE'||gs.phase==='FOLD';
+  if (gs.phase==='IDLE'||!gs.oppHole.length) {
+    area.appendChild(makeCardBack()); area.appendChild(makeCardBack());
+  } else {
+    for (const c of gs.oppHole) area.appendChild(reveal?makeCard(c):makeCardBack());
+  }
+  const hn=document.getElementById('opp-hand-name');
+  if (reveal&&gs.oppHole.length===2&&gs.comm.length===5) {
+    const b=bestHand([...gs.oppHole,...gs.comm]);
+    hn.textContent=b?HAND_NAMES[b.rank]:'';
+  } else { hn.textContent=''; }
+}
+
 function makeMiniCard(c) {
   const el=document.createElement('div');
   const red=c.suit==='♥'||c.suit==='♦';
@@ -613,22 +651,32 @@ function renderButtons() {
 function renderResult() {
   const el=document.getElementById('result-area');
   if (gs.phase==='IDLE'||gs.phase==='PREFLOP'){el.className='result-box';el.innerHTML='';return;}
-  if (gs.phase==='FOLD'){
-    const b=bestHand([...gs.hole,...gs.comm]);
-    el.className='result-box res-fold vis';
-    el.innerHTML=`폴드했습니다.${b?` &nbsp;·&nbsp; 완성될 패: <span style="color:var(--warn);font-weight:800">${HAND_NAMES[b.rank]}</span>`:''}`;
-    return;
-  }
-  if (gs.phase==='DONE'){
-    const b=bestHand([...gs.hole,...gs.comm]);
-    el.className='result-box res-done vis';
-    el.innerHTML=b?`최종 패: <span style="font-size:20px">${HAND_NAMES[b.rank]}</span>`:'결과를 확인하세요.';
+  if (gs.phase==='FOLD'||gs.phase==='DONE') {
+    const myB=bestHand([...gs.hole,...gs.comm]);
+    const opB=bestHand([...gs.oppHole,...gs.comm]);
+    const cmp=myB&&opB?cmpH(myB,opB):0;
+    if (gs.phase==='FOLD') {
+      const judge=cmp>0?`<span style="color:var(--accent)">이겼을 패</span>`:cmp<0?`<span style="color:var(--danger)">졌을 패</span>`:`<span style="color:var(--warn)">무승부</span>`;
+      el.className='result-box res-fold vis';
+      el.innerHTML=`폴드 &nbsp;·&nbsp; ${myB?`내 패: <span style="color:var(--warn)">${HAND_NAMES[myB.rank]}</span>`:''}  &nbsp;·&nbsp; ${judge}`;
+    } else {
+      if (cmp>0) {
+        el.className='result-box res-done vis';
+        el.innerHTML=`🏆 승리! &nbsp;<span style="font-size:18px">${myB?HAND_NAMES[myB.rank]:''}</span> &nbsp;vs&nbsp; <span style="font-size:15px;opacity:0.7">${opB?HAND_NAMES[opB.rank]:''}</span>`;
+      } else if (cmp<0) {
+        el.className='result-box res-lose vis';
+        el.innerHTML=`패배 &nbsp;<span style="font-size:15px;opacity:0.7">${myB?HAND_NAMES[myB.rank]:''}</span> &nbsp;vs&nbsp; <span style="font-size:18px">${opB?HAND_NAMES[opB.rank]:''}</span>`;
+      } else {
+        el.className='result-box res-tie vis';
+        el.innerHTML=`무승부 &nbsp;·&nbsp; <span style="font-size:18px">${myB?HAND_NAMES[myB.rank]:''}</span>`;
+      }
+    }
     return;
   }
   const msgs={FLOP:'플랍 오픈!',TURN:'턴 오픈!',RIVER:'리버 오픈!'};
   el.className='result-box res-info vis'; el.textContent=msgs[gs.phase]||'';
 }
-function renderAll(){renderStages();renderCommunity();renderWinRate();renderOuts();renderPlayer();renderButtons();renderResult();}
+function renderAll(){renderStages();renderOpponent();renderCommunity();renderWinRate();renderOuts();renderPlayer();renderButtons();renderResult();}
 
 renderAll();
 </script>
