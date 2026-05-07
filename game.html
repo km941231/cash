@@ -416,6 +416,8 @@ const SUITS  = ['♠','♥','♦','♣'];
 const VALUES = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
 const RANK   = Object.fromEntries(VALUES.map((v, i) => [v, i + 2]));
 const HAND_NAMES = ['하이카드','원페어','투페어','트리플','스트레이트','플러시','풀하우스','포카드','스트레이트 플러시','로얄 플러시'];
+function rankToName(r){if(r===14)return'A';if(r===13)return'K';if(r===12)return'Q';if(r===11)return'J';if(r===10)return'10';return String(r);}
+function handLabel(b){return rankToName(b.tb[0])+' '+HAND_NAMES[b.rank];}
 const STAGES = [{key:'PREFLOP',lbl:'프리플랍'},{key:'FLOP',lbl:'플랍'},{key:'TURN',lbl:'턴'},{key:'RIVER',lbl:'리버'}];
 const STAGE_IDX = {PREFLOP:0,FLOP:1,TURN:2,RIVER:3,DONE:4,FOLD:-1,IDLE:-1};
 
@@ -569,7 +571,7 @@ function renderOpponent() {
   const hn=document.getElementById('opp-hand-name');
   if (gs.oppHole.length===2&&gs.comm.length===5) {
     const b=bestHand([...gs.oppHole,...gs.comm]);
-    hn.textContent=b?HAND_NAMES[b.rank]:'';
+    hn.textContent=b?handLabel(b):'';
   } else { hn.textContent=''; }
 }
 
@@ -632,14 +634,14 @@ function renderPlayer() {
   for (const c of gs.hole) area.appendChild(makeCard(c));
   const hn=document.getElementById('hand-name'), all=[...gs.hole,...gs.comm];
   if (!gs.hole.length){hn.textContent='';return;}
-  if (all.length>=5){const b=bestHand(all);hn.textContent=b?HAND_NAMES[b.rank]:'';}
+  if (all.length>=5){const b=bestHand(all);hn.textContent=b?handLabel(b):'';}
   else{const[a,b]=gs.hole;if(a.rank===b.rank)hn.textContent='포켓 페어';else if(a.suit===b.suit)hn.textContent='수티드';else hn.textContent='오프수트';}
 }
 function renderButtons() {
   const area=document.getElementById('action-area'); area.innerHTML='';
   const add=(cls,txt,fn)=>{const b=document.createElement('button');b.className='gbtn '+cls;b.textContent=txt;b.onclick=fn;area.appendChild(b);};
   if (gs.phase==='IDLE')        add('gbtn-call','게임 시작',startGame);
-  else if (gs.phase==='PREFLOP'){add('gbtn-call','콜 → 플랍 보기',doCall);add('gbtn-fold','폴드',doFold);}
+  else if (gs.phase==='PREFLOP'){add('gbtn-call','콜',doCall);add('gbtn-fold','폴드',doFold);}
   else if (gs.phase==='FLOP')  {add('gbtn-next','턴 카드 보기',doCall);add('gbtn-fold','폴드',doFold);}
   else if (gs.phase==='TURN')  {add('gbtn-next','리버 카드 보기',doCall);add('gbtn-fold','폴드',doFold);}
   else if (gs.phase==='RIVER') {}
@@ -659,13 +661,13 @@ function renderResult() {
     } else {
       if (cmp>0) {
         el.className='result-box res-done vis';
-        el.innerHTML=`🏆 승리! &nbsp;<span style="font-size:18px">${myB?HAND_NAMES[myB.rank]:''}</span> &nbsp;vs&nbsp; <span style="font-size:15px;opacity:0.7">${opB?HAND_NAMES[opB.rank]:''}</span>`;
+        el.innerHTML=`🏆 승리!`;
       } else if (cmp<0) {
         el.className='result-box res-lose vis';
-        el.innerHTML=`패배 &nbsp;<span style="font-size:15px;opacity:0.7">${myB?HAND_NAMES[myB.rank]:''}</span> &nbsp;vs&nbsp; <span style="font-size:18px">${opB?HAND_NAMES[opB.rank]:''}</span>`;
+        el.innerHTML=`패배`;
       } else {
         el.className='result-box res-tie vis';
-        el.innerHTML=`무승부 &nbsp;·&nbsp; <span style="font-size:18px">${myB?HAND_NAMES[myB.rank]:''}</span>`;
+        el.innerHTML=`무승부`;
       }
     }
     return;
