@@ -516,7 +516,11 @@ function doCall() {
   }
   else if (gs.phase==='RIVER') { gs.phase='DONE'; renderAll(); }
 }
-function doFold() { gs.phase='FOLD'; renderAll(); }
+function doFold() {
+  const remaining=5-gs.comm.length;
+  if (remaining>0) gs.comm.push(...deal(gs.deck,remaining));
+  gs.phase='FOLD'; renderAll();
+}
 
 function calcAsync(n) {
   const pct=document.getElementById('wr-pct'), fill=document.getElementById('wr-fill');
@@ -561,7 +565,8 @@ function renderCommunity() {
 }
 function renderWinRate() {
   const pct=document.getElementById('wr-pct'),fill=document.getElementById('wr-fill'),sub=document.getElementById('wr-sub');
-  if (gs.phase==='IDLE'||gs.phase==='FOLD') { pct.textContent='—';pct.className='wr-pct';fill.style.width='0%';sub.textContent='';return; }
+  if (gs.phase==='IDLE') { pct.textContent='—';pct.className='wr-pct';fill.style.width='0%';sub.textContent='';return; }
+  if (gs.phase==='FOLD'&&gs.winRate===0) { pct.textContent='—';pct.className='wr-pct';fill.style.width='0%';sub.textContent='';return; }
   pct.textContent=gs.winRate+'%'; pct.className='wr-pct'; fill.style.width=gs.winRate+'%';
   sub.textContent=gs.tieRate>0?`무승부 ${gs.tieRate}% 포함`:'랜덤 상대 1명 기준';
 }
@@ -608,7 +613,12 @@ function renderButtons() {
 function renderResult() {
   const el=document.getElementById('result-area');
   if (gs.phase==='IDLE'||gs.phase==='PREFLOP'){el.className='result-box';el.innerHTML='';return;}
-  if (gs.phase==='FOLD'){el.className='result-box res-fold vis';el.textContent='폴드했습니다.';return;}
+  if (gs.phase==='FOLD'){
+    const b=bestHand([...gs.hole,...gs.comm]);
+    el.className='result-box res-fold vis';
+    el.innerHTML=`폴드했습니다.${b?` &nbsp;·&nbsp; 완성될 패: <span style="color:var(--warn);font-weight:800">${HAND_NAMES[b.rank]}</span>`:''}`;
+    return;
+  }
   if (gs.phase==='DONE'){
     const b=bestHand([...gs.hole,...gs.comm]);
     el.className='result-box res-done vis';
