@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GTSNT79T0S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-GTSNT79T0S');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>계산기</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .calculator {
+      background: #16213e;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      width: 320px;
+    }
+
+    .display {
+      background: #0f3460;
+      border-radius: 12px;
+      padding: 20px 16px 12px;
+      margin-bottom: 20px;
+      text-align: right;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .display .expression {
+      color: #a0aec0;
+      font-size: 14px;
+      min-height: 20px;
+      word-break: break-all;
+    }
+
+    .display .result {
+      color: #e2e8f0;
+      font-size: 36px;
+      font-weight: 300;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      outline: none;
+    }
+
+    button:active {
+      transform: scale(0.94);
+    }
+
+    .btn-number {
+      background: #1a1a4e;
+      color: #e2e8f0;
+    }
+
+    .btn-number:hover {
+      background: #252580;
+    }
+
+    .btn-operator {
+      background: #e94560;
+      color: #fff;
+    }
+
+    .btn-operator:hover {
+      background: #ff6b81;
+    }
+
+    .btn-action {
+      background: #0f3460;
+      color: #a0d8ef;
+    }
+
+    .btn-action:hover {
+      background: #1a4f85;
+    }
+
+    .btn-equals {
+      background: #e94560;
+      color: #fff;
+      font-size: 22px;
+    }
+
+    .btn-equals:hover {
+      background: #ff6b81;
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="result" id="result">0</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-action" onclick="clearAll()">AC</button>
+      <button class="btn-action" onclick="toggleSign()">+/-</button>
+      <button class="btn-action" onclick="percentage()">%</button>
+      <button class="btn-operator" onclick="inputOperator('/')">÷</button>
+
+      <button class="btn-number" onclick="inputNumber('7')">7</button>
+      <button class="btn-number" onclick="inputNumber('8')">8</button>
+      <button class="btn-number" onclick="inputNumber('9')">9</button>
+      <button class="btn-operator" onclick="inputOperator('*')">×</button>
+
+      <button class="btn-number" onclick="inputNumber('4')">4</button>
+      <button class="btn-number" onclick="inputNumber('5')">5</button>
+      <button class="btn-number" onclick="inputNumber('6')">6</button>
+      <button class="btn-operator" onclick="inputOperator('-')">−</button>
+
+      <button class="btn-number" onclick="inputNumber('1')">1</button>
+      <button class="btn-number" onclick="inputNumber('2')">2</button>
+      <button class="btn-number" onclick="inputNumber('3')">3</button>
+      <button class="btn-operator" onclick="inputOperator('+')">+</button>
+
+      <button class="btn-number btn-zero" onclick="inputNumber('0')">0</button>
+      <button class="btn-number" onclick="inputDot()">.</button>
+      <button class="btn-equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let current = '0';
+    let previous = '';
+    let operator = null;
+    let shouldResetCurrent = false;
+
+    const resultEl = document.getElementById('result');
+    const expressionEl = document.getElementById('expression');
+
+    function updateDisplay() {
+      resultEl.textContent = current;
+    }
+
+    function inputNumber(num) {
+      if (shouldResetCurrent) {
+        current = num;
+        shouldResetCurrent = false;
+      } else {
+        current = current === '0' ? num : current + num;
+      }
+      if (current.length > 12) current = current.slice(0, 12);
+      updateDisplay();
+    }
+
+    function inputDot() {
+      if (shouldResetCurrent) {
+        current = '0.';
+        shouldResetCurrent = false;
+      } else if (!current.includes('.')) {
+        current += '.';
+      }
+      updateDisplay();
+    }
+
+    function inputOperator(op) {
+      if (operator && !shouldResetCurrent) {
+        calculate(true);
+      }
+      previous = current;
+      operator = op;
+      shouldResetCurrent = true;
+      const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[op];
+      expressionEl.textContent = `${previous} ${opSymbol}`;
+    }
+
+    function calculate(chaining = false) {
+      if (!operator || !previous) return;
+      const a = parseFloat(previous);
+      const b = parseFloat(current);
+      let result;
+      switch (operator) {
+        case '+': result = a + b; break;
+        case '-': result = a - b; break;
+        case '*': result = a * b; break;
+        case '/':
+          if (b === 0) { current = '오류'; operator = null; previous = ''; updateDisplay(); return; }
+          result = a / b;
+          break;
+      }
+      const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[operator];
+      if (!chaining) expressionEl.textContent = `${previous} ${opSymbol} ${current} =`;
+      current = parseFloat(result.toPrecision(10)).toString();
+      if (current.length > 12) current = parseFloat(result.toExponential(6)).toString();
+      operator = chaining ? operator : null;
+      previous = chaining ? current : '';
+      shouldResetCurrent = true;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      current = '0';
+      previous = '';
+      operator = null;
+      shouldResetCurrent = false;
+      expressionEl.textContent = '';
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      current = (parseFloat(current) * -1).toString();
+      updateDisplay();
+    }
+
+    function percentage() {
+      current = (parseFloat(current) / 100).toString();
+      updateDisplay();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') inputNumber(e.key);
+      else if (e.key === '.') inputDot();
+      else if (e.key === '+') inputOperator('+');
+      else if (e.key === '-') inputOperator('-');
+      else if (e.key === '*') inputOperator('*');
+      else if (e.key === '/') { e.preventDefault(); inputOperator('/'); }
+      else if (e.key === 'Enter' || e.key === '=') calculate();
+      else if (e.key === 'Escape') clearAll();
+      else if (e.key === 'Backspace') {
+        if (current.length > 1) current = current.slice(0, -1);
+        else current = '0';
+        updateDisplay();
+      }
+    });
+  </script>
+</body>
+</html>

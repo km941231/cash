@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GTSNT79T0S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-GTSNT79T0S');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>텍사스 홀덤 연습</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 24px 16px 40px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    #game-container {
+      background: #16213e;
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ─── 헤더 ─── */
+    .header { text-align: center; }
+    .header h1 { color: #e2e8f0; font-size: 21px; font-weight: 700; }
+    .header h1 em { color: #4ade80; font-style: normal; }
+    .header p { color: #4a5568; font-size: 12px; margin-top: 3px; }
+
+    /* ─── 단계 표시 ─── */
+    .stage-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+    }
+    .stage-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #0f3460;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .stage-dot.active { background: #4ade80; transform: scale(1.45); }
+    .stage-dot.done   { background: #2d6a4f; }
+    .stage-lbl {
+      color: #3a4a60; font-size: 12px; font-weight: 600; padding: 0 3px;
+      transition: color 0.3s;
+    }
+    .stage-lbl.active { color: #4ade80; }
+    .stage-lbl.done   { color: #2d6a4f; }
+    .stage-sep { color: #2d3748; font-size: 11px; padding: 0 1px; }
+
+    /* ─── 커뮤니티 카드 ─── */
+    .community-section {
+      background: #0a2540;
+      border-radius: 16px;
+      padding: 14px 16px 16px;
+      border: 1px solid #1e4d8c;
+    }
+    .section-lbl {
+      text-align: center;
+      color: #718096;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+    }
+    .cards-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      min-height: 88px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ─── 카드 ─── */
+    .card {
+      width: 58px; height: 84px;
+      background: #ffffff;
+      border-radius: 7px;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      padding: 4px 5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+      font-weight: 800;
+      flex-shrink: 0;
+      animation: dealCard 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card .top { font-size: 15px; line-height: 1.15; }
+    .card .mid { font-size: 22px; text-align: center; line-height: 1; }
+    .card .bot { font-size: 15px; line-height: 1.15; text-align: right; transform: rotate(180deg); }
+    .card.red   { color: #dc2626; }
+    .card.black { color: #111827; }
+
+    .card-slot {
+      width: 58px; height: 84px;
+      border-radius: 7px;
+      border: 2px dashed #1a4080;
+      background: rgba(15, 52, 96, 0.18);
+      flex-shrink: 0;
+    }
+
+    @keyframes dealCard {
+      from { transform: scale(0.35) translateY(-50px) rotate(-6deg); opacity: 0; }
+      to   { transform: scale(1)    translateY(0)     rotate(0);     opacity: 1; }
+    }
+
+    /* ─── 승률 ─── */
+    .wr-section { display: flex; flex-direction: column; gap: 6px; padding: 0 2px; }
+    .wr-top     { display: flex; justify-content: space-between; align-items: baseline; }
+    .wr-title   { color: #718096; font-size: 12.5px; }
+    .wr-pct     { color: #4ade80; font-size: 26px; font-weight: 800; transition: color 0.3s; }
+    .wr-pct.calc { color: #4a5568; font-size: 14px; align-self: center; }
+    .wr-track   { background: #0f3460; border-radius: 999px; height: 10px; overflow: hidden; }
+    .wr-fill    {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+      transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .wr-sub { color: #3a4a60; font-size: 11px; text-align: right; min-height: 15px; }
+
+    /* ─── 아웃츠 ─── */
+    .outs-section {
+      background: #0f1f35;
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid #1a3a5c;
+    }
+    .outs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 9px;
+    }
+    .outs-title { color: #718096; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
+    .outs-summary { display: flex; align-items: baseline; gap: 8px; }
+    .outs-num  { color: #e2e8f0; font-size: 22px; font-weight: 800; }
+    .outs-prob-label { color: #718096; font-size: 12px; }
+    .outs-prob { color: #fbbf24; font-weight: 700; font-size: 14px; }
+    .outs-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .out-tag {
+      background: rgba(30, 77, 140, 0.45);
+      border: 1px solid #1e4d8c;
+      color: #90cdf4;
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .out-tag .oc { color: #4ade80; font-weight: 700; }
+    .outs-none { color: #4a5568; font-size: 13px; font-style: italic; }
+
+    /* ─── 내 패 ─── */
+    .player-section { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .hand-name { font-size: 16px; font-weight: 700; color: #fbbf24; min-height: 22px; text-align: center; }
+
+    /* ─── 버튼 ─── */
+    .action-area { display: flex; gap: 10px; }
+    .btn {
+      flex: 1; padding: 13px; border-radius: 12px;
+      font-size: 16px; font-weight: 700;
+      border: none; cursor: pointer;
+      transition: background 0.12s, transform 0.1s;
+      letter-spacing: 0.2px;
+    }
+    .btn:active  { transform: scale(0.95); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn-call  { background: #4ade80; color: #0d1f0d; }
+    .btn-call:hover:not(:disabled)  { background: #22c55e; }
+    .btn-fold  { background: #e94560; color: #fff; }
+    .btn-fold:hover:not(:disabled)  { background: #ff4d6d; }
+    .btn-next  { background: #0f3460; color: #7ecaef; border: 1px solid #1e4d8c; }
+    .btn-next:hover:not(:disabled)  { background: #1a4f85; }
+    .btn-new   { background: #1a1a4e; color: #e2e8f0; border: 1px solid #2d3a6a; }
+    .btn-new:hover:not(:disabled)   { background: #22226e; }
+
+    /* ─── 결과 ─── */
+    .result-area {
+      border-radius: 12px; padding: 13px 16px;
+      text-align: center; font-size: 17px; font-weight: 700;
+      min-height: 50px; display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .result-area.vis { opacity: 1; }
+    .result-done { background: rgba(74,222,128,0.13); color: #4ade80; }
+    .result-fold { background: rgba(160,174,192,0.08); color: #9ca3af; }
+    .result-info { background: rgba(15,52,96,0.55); color: #90cdf4; }
+  </style>
+</head>
+<body>
+<div id="game-container">
+
+  <div class="header">
+    <h1>텍사스 <em>홀덤</em> 연습</h1>
+    <p>랜덤 상대 1명 기준 승률 계산</p>
+  </div>
+
+  <div id="stage-bar" class="stage-bar"></div>
+
+  <div class="community-section">
+    <div class="section-lbl">커뮤니티 카드</div>
+    <div id="community-cards" class="cards-row"></div>
+  </div>
+
+  <div class="wr-section">
+    <div class="wr-top">
+      <span class="wr-title">승리 확률</span>
+      <span id="wr-pct" class="wr-pct">—</span>
+    </div>
+    <div class="wr-track"><div id="wr-fill" class="wr-fill" style="width:0%"></div></div>
+    <div id="wr-sub" class="wr-sub"></div>
+  </div>
+
+  <div id="outs-section" class="outs-section" style="display:none">
+    <div class="outs-header">
+      <span class="outs-title">아웃츠</span>
+      <div class="outs-summary">
+        <span id="outs-num" class="outs-num">0</span>
+        <span class="outs-prob-label">장 &nbsp;|&nbsp; 다음 카드 힛 확률 <span id="outs-prob" class="outs-prob">0%</span></span>
+      </div>
+    </div>
+    <div id="outs-list" class="outs-list"></div>
+  </div>
+
+  <div class="player-section">
+    <div class="section-lbl">내 패</div>
+    <div id="player-cards" class="cards-row"></div>
+    <div id="hand-name" class="hand-name"></div>
+  </div>
+
+  <div id="action-area" class="action-area"></div>
+
+  <div id="result-area" class="result-area"></div>
+
+</div>
+<script>
+'use strict';
+
+// ─── 상수 ──────────────────────────────────────────────────────────
+const SUITS  = ['♠','♥','♦','♣'];
+const VALUES = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+const RANK   = Object.fromEntries(VALUES.map((v, i) => [v, i + 2]));
+const HAND_NAMES = [
+  '하이카드','원페어','투페어','트리플',
+  '스트레이트','플러시','풀하우스',
+  '포카드','스트레이트 플러시','로얄 플러시'
+];
+const STAGES = [
+  { key:'PREFLOP', lbl:'프리플랍' },
+  { key:'FLOP',    lbl:'플랍' },
+  { key:'TURN',    lbl:'턴' },
+  { key:'RIVER',   lbl:'리버' }
+];
+const STAGE_IDX = { PREFLOP:0, FLOP:1, TURN:2, RIVER:3, DONE:4, FOLD:-1, IDLE:-1 };
+
+// ─── 덱 ────────────────────────────────────────────────────────────
+function createDeck() {
+  return SUITS.flatMap(s => VALUES.map(v => ({ suit: s, value: v, rank: RANK[v] })));
+}
+function shuffle(deck) {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+function deal(deck, n) { return deck.splice(0, n); }
+
+// ─── 패 평가 ────────────────────────────────────────────────────────
+function combos(arr, k) {
+  const res = [];
+  (function go(s, cur) {
+    if (cur.length === k) { res.push(cur.slice()); return; }
+    for (let i = s; i < arr.length; i++) { cur.push(arr[i]); go(i+1, cur); cur.pop(); }
+  })(0, []);
+  return res;
+}
+
+function evalFive(cards) {
+  const r = cards.map(c => c.rank).sort((a, b) => b - a);
+  const s = cards.map(c => c.suit);
+  const flush = s.every(x => x === s[0]);
+
+  let str = false, strHi = 0;
+  if (new Set(r).size === 5) {
+    if (r[0] - r[4] === 4)                                       { str = true; strHi = r[0]; }
+    else if (r[0]===14&&r[1]===5&&r[2]===4&&r[3]===3&&r[4]===2) { str = true; strHi = 5; }
+  }
+
+  const cm = {};
+  for (const x of r) cm[x] = (cm[x] || 0) + 1;
+  const grp = Object.entries(cm).sort((a, b) => b[1]-a[1] || b[0]-a[0]);
+  const cnt = grp.map(g => g[1]);
+  const grs = grp.map(g => +g[0]);
+
+  if (flush && str) return { rank: strHi===14 ? 9 : 8, tb:[strHi] };
+  if (cnt[0]===4)              return { rank:7, tb:[grs[0],grs[1]] };
+  if (cnt[0]===3&&cnt[1]===2)  return { rank:6, tb:[grs[0],grs[1]] };
+  if (flush)                   return { rank:5, tb:r };
+  if (str)                     return { rank:4, tb:[strHi] };
+  if (cnt[0]===3)              return { rank:3, tb:grs };
+  if (cnt[0]===2&&cnt[1]===2)  return { rank:2, tb:grs };
+  if (cnt[0]===2)              return { rank:1, tb:grs };
+  return                              { rank:0, tb:r };
+}
+
+function bestHand(cards) {
+  if (cards.length < 5) return null;
+  return combos(cards, 5).reduce((best, c) => {
+    const h = evalFive(c);
+    return !best || cmpH(h, best) > 0 ? h : best;
+  }, null);
+}
+
+function cmpH(a, b) {
+  if (a.rank !== b.rank) return a.rank - b.rank;
+  for (let i = 0; i < Math.min(a.tb.length, b.tb.length); i++)
+    if (a.tb[i] !== b.tb[i]) return a.tb[i] - b.tb[i];
+  return 0;
+}
+
+// ─── 몬테카를로 ─────────────────────────────────────────────────────
+function monteCarlo(hole, comm, n) {
+  const known = [...hole, ...comm];
+  const pool  = createDeck().filter(c => !known.some(k => k.suit===c.suit && k.rank===c.rank));
+  const fill  = 5 - comm.length;
+  let win = 0, tie = 0;
+
+  for (let i = 0; i < n; i++) {
+    shuffle(pool);
+    const opp  = pool.slice(0, 2);
+    const more = pool.slice(2, 2 + fill);
+    const full = [...comm, ...more];
+    const me   = bestHand([...hole, ...full]);
+    const op   = bestHand([...opp,  ...full]);
+    const c    = cmpH(me, op);
+    if (c > 0) win++; else if (c === 0) tie++;
+  }
+  return {
+    winRate: Math.round((win + tie * 0.5) / n * 100),
+    tieRate: Math.round(tie / n * 100)
+  };
+}
+
+// ─── 아웃츠 분석 ────────────────────────────────────────────────────
+function analyzeOuts(hole, comm) {
+  // 플랍(3장) 또는 턴(4장)에서만 의미 있음
+  if (comm.length < 3 || comm.length >= 5) return null;
+
+  const all    = [...hole, ...comm];
+  const known  = all;
+  const unseen = createDeck().filter(c => !known.some(k => k.suit===c.suit && k.rank===c.rank));
+  const cur    = bestHand(all);
+  if (!cur) return null;
+
+  // 다음 1장이 왔을 때 패가 올라가는 카드 찾기
+  const byRank = {};
+  let total = 0;
+
+  for (const c of unseen) {
+    const next = bestHand([...all, c]);
+    if (next && cmpH(next, cur) > 0) {
+      byRank[next.rank] = (byRank[next.rank] || 0) + 1;
+      total++;
+    }
+  }
+
+  const draws = Object.entries(byRank)
+    .sort((a, b) => +b[0] - +a[0])
+    .map(([rankStr, count]) => ({ handName: HAND_NAMES[+rankStr], count }));
+
+  return {
+    total,
+    unseen: unseen.length,
+    hitProb: Math.round(total / unseen.length * 100),
+    draws
+  };
+}
+
+// ─── 게임 상태 ──────────────────────────────────────────────────────
+const gs = { phase:'IDLE', deck:[], hole:[], comm:[], winRate:0, tieRate:0 };
+
+function startGame() {
+  gs.deck    = shuffle(createDeck());
+  gs.hole    = deal(gs.deck, 2);
+  gs.comm    = [];
+  gs.winRate = 0;
+  gs.tieRate = 0;
+  gs.phase   = 'PREFLOP';
+  renderAll();
+  calcAsync(1500);
+}
+
+function doCall() {
+  const t = {
+    PREFLOP: () => { gs.comm = deal(gs.deck, 3); gs.phase = 'FLOP'; },
+    FLOP:    () => { gs.comm.push(...deal(gs.deck, 1)); gs.phase = 'TURN'; },
+    TURN:    () => { gs.comm.push(...deal(gs.deck, 1)); gs.phase = 'RIVER'; },
+    RIVER:   () => { gs.phase = 'DONE'; }
+  };
+  if (t[gs.phase]) t[gs.phase]();
+  renderAll();
+  if (gs.phase !== 'DONE') calcAsync(1000);
+}
+
+function doFold() {
+  gs.phase = 'FOLD';
+  renderAll();
+}
+
+function calcAsync(n) {
+  const pct  = document.getElementById('wr-pct');
+  const fill = document.getElementById('wr-fill');
+  pct.textContent  = '계산 중...';
+  pct.className    = 'wr-pct calc';
+  fill.style.width = '0%';
+  setTimeout(() => {
+    const r = monteCarlo(gs.hole, gs.comm, n);
+    gs.winRate = r.winRate;
+    gs.tieRate = r.tieRate;
+    renderWinRate();
+  }, 10);
+}
+
+// ─── 렌더 ───────────────────────────────────────────────────────────
+function makeCard(c) {
+  const el  = document.createElement('div');
+  const red = c.suit === '♥' || c.suit === '♦';
+  el.className = 'card ' + (red ? 'red' : 'black');
+  const v = c.value === 'T' ? '10' : c.value;
+  el.innerHTML =
+    `<div class="top">${v}${c.suit}</div>` +
+    `<div class="mid">${c.suit}</div>` +
+    `<div class="bot">${v}${c.suit}</div>`;
+  return el;
+}
+
+function makeSlot() {
+  const el = document.createElement('div');
+  el.className = 'card-slot';
+  return el;
+}
+
+function renderStages() {
+  const bar = document.getElementById('stage-bar');
+  bar.innerHTML = '';
+  const idx = STAGE_IDX[gs.phase] ?? -1;
+  STAGES.forEach((s, i) => {
+    if (i > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'stage-sep'; sep.textContent = '›';
+      bar.appendChild(sep);
+    }
+    const dot = document.createElement('div');
+    dot.className = 'stage-dot';
+    const lbl = document.createElement('span');
+    lbl.className = 'stage-lbl'; lbl.textContent = s.lbl;
+    if (i === idx)    { dot.classList.add('active'); lbl.classList.add('active'); }
+    else if (i < idx) { dot.classList.add('done');   lbl.classList.add('done'); }
+    bar.appendChild(dot);
+    bar.appendChild(lbl);
+  });
+}
+
+function renderCommunity() {
+  const area = document.getElementById('community-cards');
+  area.innerHTML = '';
+  for (let i = 0; i < 5; i++)
+    area.appendChild(i < gs.comm.length ? makeCard(gs.comm[i]) : makeSlot());
+}
+
+function renderWinRate() {
+  const pct  = document.getElementById('wr-pct');
+  const fill = document.getElementById('wr-fill');
+  const sub  = document.getElementById('wr-sub');
+
+  if (gs.phase === 'IDLE' || gs.phase === 'FOLD') {
+    pct.textContent = '—'; pct.className = 'wr-pct';
+    fill.style.width = '0%'; sub.textContent = '';
+    return;
+  }
+  pct.textContent  = gs.winRate + '%';
+  pct.className    = 'wr-pct';
+  fill.style.width = gs.winRate + '%';
+  sub.textContent  = gs.tieRate > 0 ? `무승부 ${gs.tieRate}% 포함` : '랜덤 상대 1명 기준';
+}
+
+function renderOuts() {
+  const section = document.getElementById('outs-section');
+  const numEl   = document.getElementById('outs-num');
+  const probEl  = document.getElementById('outs-prob');
+  const listEl  = document.getElementById('outs-list');
+
+  // 플랍·턴에서만 표시
+  if (gs.phase !== 'FLOP' && gs.phase !== 'TURN') {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+
+  const res = analyzeOuts(gs.hole, gs.comm);
+  if (!res) { section.style.display = 'none'; return; }
+
+  numEl.textContent  = res.total;
+  probEl.textContent = res.hitProb + '%';
+
+  if (res.total === 0) {
+    listEl.innerHTML = '<span class="outs-none">현재 패가 최선 — 개선할 아웃츠 없음</span>';
+    return;
+  }
+
+  listEl.innerHTML = res.draws
+    .map(d => `<span class="out-tag">→ ${d.handName} <span class="oc">${d.count}장</span></span>`)
+    .join('');
+}
+
+function renderPlayer() {
+  const area = document.getElementById('player-cards');
+  area.innerHTML = '';
+  for (const c of gs.hole) area.appendChild(makeCard(c));
+
+  const hn  = document.getElementById('hand-name');
+  const all = [...gs.hole, ...gs.comm];
+
+  if (gs.hole.length === 0) { hn.textContent = ''; return; }
+
+  if (all.length >= 5) {
+    const b = bestHand(all);
+    hn.textContent = b ? HAND_NAMES[b.rank] : '';
+  } else {
+    const [a, b] = gs.hole;
+    if (a.rank === b.rank)    hn.textContent = '포켓 페어';
+    else if (a.suit===b.suit) hn.textContent = '수티드';
+    else                      hn.textContent = '오프수트';
+  }
+}
+
+function renderButtons() {
+  const area = document.getElementById('action-area');
+  area.innerHTML = '';
+  const add = (cls, txt, fn) => {
+    const b = document.createElement('button');
+    b.className = 'btn ' + cls; b.textContent = txt; b.onclick = fn;
+    area.appendChild(b);
+  };
+
+  if (gs.phase === 'IDLE')       { add('btn-call','게임 시작', startGame); }
+  else if (gs.phase==='PREFLOP') { add('btn-call','콜 → 플랍 보기', doCall); add('btn-fold','폴드', doFold); }
+  else if (gs.phase==='FLOP')    { add('btn-next','턴 카드 보기', doCall);    add('btn-fold','폴드', doFold); }
+  else if (gs.phase==='TURN')    { add('btn-next','리버 카드 보기', doCall);  add('btn-fold','폴드', doFold); }
+  else if (gs.phase==='RIVER')   { add('btn-next','최종 패 확인', doCall); }
+  else                           { add('btn-new','새 게임', startGame); }
+}
+
+function renderResult() {
+  const el = document.getElementById('result-area');
+
+  if (gs.phase==='IDLE' || gs.phase==='PREFLOP') {
+    el.className = 'result-area'; el.innerHTML = ''; return;
+  }
+  if (gs.phase==='FOLD') {
+    el.className = 'result-area result-fold vis';
+    el.textContent = '폴드했습니다.'; return;
+  }
+  if (gs.phase==='DONE') {
+    const b = bestHand([...gs.hole, ...gs.comm]);
+    el.className = 'result-area result-done vis';
+    el.innerHTML = b
+      ? `최종 패: <span style="font-size:20px">${HAND_NAMES[b.rank]}</span>`
+      : '결과를 확인하세요.';
+    return;
+  }
+  const msgs = { FLOP:'플랍 오픈!', TURN:'턴 오픈!', RIVER:'리버 오픈! 최종 패를 확인하세요.' };
+  el.className = 'result-area result-info vis';
+  el.textContent = msgs[gs.phase] || '';
+}
+
+function renderAll() {
+  renderStages();
+  renderCommunity();
+  renderWinRate();
+  renderOuts();
+  renderPlayer();
+  renderButtons();
+  renderResult();
+}
+
+// ─── 초기화 ─────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
